@@ -1,10 +1,12 @@
 # TOSU
 
-It is pronounced "toss" because you will be tosuing your keyboard out the window.
+### It is pronounced "toss" because you will be tosuing your keyboard out the window.
 
-**Tosu** (Typing Osu) is a rythm game where you use all letters of the keyboard!
+## ABOUT
 
-Currently being remade from the ground up, not much game is made yet.
+**Tosu** (Typing Osu) is a rhythm game where you press all letters of the keyboard to the music!
+
+Currently being remade from the ground up, not much game exists yet.
 
 ## EXPORTING ON LINUX
 
