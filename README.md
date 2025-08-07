@@ -6,7 +6,9 @@
 
 **Tosu** (Typing Osu) is a rhythm game where you press all letters of the keyboard to the music!
 
-Currently being remade from the ground up, not much game exists yet.
+Currently being remade from the ground up, a second time! (How do i keep doing this)
+
+Not much game exists yet.
 
 ## EXPORTING ON LINUX
 
