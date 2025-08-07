@@ -1,0 +1,84 @@
+[gd_scene load_steps=3 format=3 uid="uid://jn0vresj0ic5"]
+
+[sub_resource type="Animation" id="Animation_rkj1s"]
+resource_name = "spin"
+length = 10.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Triangle:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 10),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(10, 10)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Triangle:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 10),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.5708]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Triangle:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 10),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_o3lwq"]
+_data = {
+"spin": SubResource("Animation_rkj1s")
+}
+
+[node name="BG_Triangle" type="Node2D"]
+
+[node name="Triangle" type="Line2D" parent="."]
+position = Vector2(576, 320)
+scale = Vector2(1e-05, 1e-05)
+points = PackedVector2Array(0, -72, 64, 40, -64, 40, 0, -72)
+
+[node name="anim" type="AnimationPlayer" parent="Triangle"]
+root_node = NodePath("../..")
+libraries = {
+"": SubResource("AnimationLibrary_o3lwq")
+}
+
+[node name="Triangle2" type="Line2D" parent="."]
+modulate = Color(1, 1, 1, 0.9)
+position = Vector2(576, 320)
+rotation = 0.15708
+points = PackedVector2Array(0, -72, 64, 40, -64, 40, 0, -72)
+
+[node name="anim" type="AnimationPlayer" parent="Triangle2"]
+root_node = NodePath("../..")
+libraries = {
+"": SubResource("AnimationLibrary_o3lwq")
+}
+
+[node name="Triangle3" type="Line2D" parent="."]
+modulate = Color(1, 1, 1, 0.9)
+position = Vector2(576, 320)
+rotation = 0.15708
+points = PackedVector2Array(0, -72, 64, 40, -64, 40, 0, -72)
+
+[node name="anim" type="AnimationPlayer" parent="Triangle3"]
+root_node = NodePath("../..")
+libraries = {
+"": SubResource("AnimationLibrary_o3lwq")
+}
