@@ -1,6 +1,7 @@
 #ifndef TOSU_CHART
 #define TOSU_CHART
 
+#include <stdlib.h>
 #include <raylib.h>
 #include "notes.h"
 
@@ -23,20 +24,23 @@ t - The notes timecode
 typedef struct Chart
 {
 	char difficulty, speed;
-	int note_amount;
-	int notes[];
+	int code_amount;
+	int codes[];
 } Chart;
 
 typedef struct EditorNote
 {
-	EditorNote* previous, next;
+	struct EditorNote* previous;
+	struct EditorNote* next;
 	Note note;
 } EditorNote;
 
 typedef struct EditorChart
 {
-	EditorNote* start, end, current;
-	int current_time. note_amount;
+	EditorNote* start;
+	EditorNote* end;
+	EditorNote* current;
+	int current_time;
 	char difficulty, speed;
 } EditorChart;
 
@@ -56,8 +60,10 @@ bool EditorAddNote(EditorChart* editor, Note note);
 bool EditorRemoveNote(EditorChart* editor);
 
 Chart* EditorToChart(EditorChart* editor);
-EditorChart* ChartToEditor(Chart* chart);
+bool ChartToEditor(Chart* chart, EditorChart* editor);
 
+int NoteToInt(Note note);
+Note IntToNote(int note);
 
 
 #endif

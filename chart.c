@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <raylib.h>
 #include "notes.h"
 #include "chart.h"
@@ -22,7 +23,7 @@ bool EditorMoveToStart(EditorChart* editor)
 	editor->current = editor->start;
 	if(editor->current != (void*)0)
 	{
-		editor->current_time = editor->current.note.time;
+		editor->current_time = editor->current->note.time;
 		return OK;
 	}
 	editor->current_time = 0.0;
@@ -34,7 +35,7 @@ bool EditorMoveToEnd(EditorChart* editor)
 	editor->current = editor->end;
 	if(editor->current != (void*)0)
 	{
-		editor->current_time = editor->current.note.time;
+		editor->current_time = editor->current->note.time;
 		return OK;
 	}
 	return ERROR;
@@ -72,7 +73,7 @@ bool EditorMoveToTimecode(EditorChart* editor, int timecode)
 
 bool EditorAddNote(EditorChart* editor, Note note)
 {
-	EditorNote* enote = RL_MALLOC(sizeof(EditorNote));
+	EditorNote* enote = malloc(sizeof(EditorNote));
 	if(enote == (void*)0)
 	{
 		return ERROR;
@@ -120,6 +121,7 @@ bool EditorAddNote(EditorChart* editor, Note note)
 	}
 
 	editor->current = enote;
+	editor->current_time = enote->note.time;
 	return OK;
 }
 
@@ -130,9 +132,11 @@ bool EditorRemoveNote(EditorChart* editor)
 	{
 		return ERROR;
 	}
-	EditorNote* previous = editor->current->previous,
-		    next = editor->current->next;
-	RL_FREE(editor->current);
+	EditorNote* previous;
+	EditorNote* next;
+	previous = editor->current->previous;
+	next = editor->current->next;
+	free(editor->current);
 	if(previous != (void*)0)
 	{
 		previous->next = next;
@@ -160,11 +164,95 @@ bool EditorRemoveNote(EditorChart* editor)
 
 Chart* EditorToChart(EditorChart* editor)
 {
-	return (void*)0;
+	int code_amount = 0;
+	EditorNote* current = editor->start;
+	while(current != (void*)0)
+	{
+		if(current->note.hold)
+		{
+			code_amount += 2;
+		}
+		else
+		{
+			code_amount += 1;
+		}
+		current = current->next;
+	}
+
+	Chart* chart = malloc(sizeof(Chart) + sizeof(int) * code_amount);
+	chart->difficulty = editor->difficulty;
+	chart->speed = editor->speed;
+	chart->code_amount = code_amount;
+
+	current = editor->start;
+	code_amount = 0;
+	while(current != (void*)0)
+	{
+		int code = NoteToInt(current->note);
+		chart->codes[code_amount] = code;
+		code_amount++;
+		if(current->note.hold)
+		{
+			code = code & 0b11111111;
+			code += current->note.time_end << 8;
+			chart->codes[code_amount] = code;
+			code_amount++;
+		}
+
+		current = current->next;
+	}
+
+	return chart;
 }
 
-EditorChart* ChartToEditor(Chart* chart)
+bool ChartToEditor(Chart* chart, EditorChart* editor)
 {
-	return (void*)0;
+	int i = 0;
+	while(i < chart->code_amount)
+	{
+		Note note = IntToNote(chart->codes[i]);
+		i++;
+		if(note.hold)
+		{
+			note.time_end = chart->codes[i] >> 8;
+			i++;
+		}
+		EditorAddNote(editor, note);
+	}
+	editor->difficulty = chart->difficulty;
+	editor->speed = chart->speed;
+	return OK;
+}
+
+int NoteToInt(Note note)
+{
+	int code = 0;
+	if(note.hold)
+	{
+		code += 0b10;
+	}
+	if(note.mine)
+	{
+		code += 0b100;
+	}
+	code += note.key << 3;
+	code += note.time << 8;
+	return code;
+}
+
+Note IntToNote(int code)
+{
+	Note note = (Note){0};
+	if(code & 0b10)
+	{
+		note.hold = true;
+	}
+	if(code & 0b100)
+	{
+		note.mine = true;
+	}
+	note.key = (code >> 3) & 0b11111;
+	note.time = code >> 8;
+	return note;
 }
 
