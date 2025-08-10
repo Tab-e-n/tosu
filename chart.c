@@ -3,7 +3,7 @@
 #include "notes.h"
 #include "chart.h"
 
-bool ChartReadNext(Chart* chart, GameSpace game)
+bool ChartReadNext(Chart* chart, GameSpace* game)
 {
 	return UNIMPLEMENTED;
 }
@@ -73,7 +73,11 @@ bool EditorMoveToTimecode(EditorChart* editor, int timecode)
 
 bool EditorAddNote(EditorChart* editor, Note note)
 {
+	//TraceLog(LOG_INFO, "Editor Add Note malloc");
 	EditorNote* enote = malloc(sizeof(EditorNote));
+	enote->next = (void*)0;
+	enote->previous = (void*)0;
+	//TraceLog(LOG_INFO, "Editor Add Note check");
 	if(enote == (void*)0)
 	{
 		return ERROR;
@@ -82,6 +86,7 @@ bool EditorAddNote(EditorChart* editor, Note note)
 
 	if(editor->current != (void*)0)
 	{
+		//TraceLog(LOG_INFO, "current exists");
 		if(editor->current->note.time <= enote->note.time)
 		{
 			enote->previous = editor->current;
@@ -110,6 +115,7 @@ bool EditorAddNote(EditorChart* editor, Note note)
 	{
 		// If there is no current note, there shouldn't be any start or end notes aswell
 		// Checks are mostlikely redundant, maybe even detrimental?
+		//TraceLog(LOG_INFO, "current doesn't exists");
 		if(editor->start == (void*)0)
 		{
 			editor->start = enote;
@@ -160,6 +166,20 @@ bool EditorRemoveNote(EditorChart* editor)
 		editor->end = previous;
 	}
 	return OK; 
+}
+
+bool EditorClearNotes(EditorChart* editor)
+{
+	EditorMoveToStart(editor);
+	editor->start = (void*)0;
+	editor->end = (void*)0;
+	while(editor->current != (void*)0)
+	{
+		EditorNote* next = editor->current->next;
+		free(editor->current);
+		editor->current = next;
+	}
+	return OK;
 }
 
 Chart* EditorToChart(EditorChart* editor)
@@ -256,3 +276,20 @@ Note IntToNote(int code)
 	return note;
 }
 
+void DebugDrawEditor(EditorChart* editor)
+{
+	//TraceLog(LOG_INFO, "Debug Draw Editor");
+	EditorNote* current = editor->start;
+	int i = 0;
+	while(current != (void*)0)
+	{
+		//TraceLog(LOG_INFO, "%i", i);
+		int x = 2 + i * 72;
+		DrawText(TextFormat("%i", current), x, 32, 8, BLACK);
+		DrawText(TextFormat("> %i", current->next), x, 40, 8, BLACK);
+		DrawText(TextFormat("< %i", current->previous), x, 48, 8, BLACK);
+
+		current = current->next;
+		i++;
+	}
+}

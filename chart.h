@@ -45,7 +45,7 @@ typedef struct EditorChart
 } EditorChart;
 
 
-bool ChartReadNext(Chart* chart, GameSpace game);
+bool ChartReadNext(Chart* chart, GameSpace* game);
 
 Chart* LoadChart(const char* filename);
 bool SaveChart(Chart* chart, const char* filename);
@@ -58,6 +58,7 @@ bool EditorMoveToTimecode(EditorChart* editor, int timecode); // Sets current_ti
 
 bool EditorAddNote(EditorChart* editor, Note note);
 bool EditorRemoveNote(EditorChart* editor);
+bool EditorClearNotes(EditorChart* editor);
 
 Chart* EditorToChart(EditorChart* editor);
 bool ChartToEditor(Chart* chart, EditorChart* editor);
@@ -65,5 +66,6 @@ bool ChartToEditor(Chart* chart, EditorChart* editor);
 int NoteToInt(Note note);
 Note IntToNote(int note);
 
+void DebugDrawEditor(EditorChart* editor);
 
 #endif

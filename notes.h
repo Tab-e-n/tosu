@@ -44,6 +44,7 @@ KeycodeBindings DefaultBindings();
 int GetKeyboardInput();
 int GetKeyboardInputRelease();
 int KeycodeToKeyboard(char code, KeycodeBindings bindings);
+char KeyboardToKeycode(int key, KeycodeBindings bindings);
 
 int HitWindow(int difficulty, int hit);
 int HitScorePoints(char score);

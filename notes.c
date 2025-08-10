@@ -49,6 +49,20 @@ int KeycodeToKeyboard(char code, KeycodeBindings bindings)
 	return bindings.codes[code];
 }
 
+char KeyboardToKeycode(int key, KeycodeBindings bindings)
+{
+	int code = 0;
+	while(bindings.codes[code] != key)
+	{
+		code++;
+		if(code >= KEY_AMOUNT)
+		{
+			return 0;
+		}
+	}
+	return code;
+}
+
 int HitWindow(int difficulty, int hit)
 {
 	return (BASE_HIT_WINDOW - difficulty) * hit;
