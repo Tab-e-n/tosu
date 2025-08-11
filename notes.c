@@ -264,54 +264,59 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
 	game->time++;
 }
 
-void DebugDrawNotes(GameSpace* game)
+void DebugDrawNote(Note note, int time)
+{
+	if(!note.active)
+	{
+		return;
+	}
+	Vector2 position = (Vector2){32, 96};
+	if(note.key < 10)
+	{
+		position.x += note.key * 40;
+	}
+	else if(note.key < 19)
+	{
+		position.x += (note.key - 10) * 40 + 10;
+		position.y += 40;
+	}
+	else
+	{
+		position.x += (note.key - 19) * 40 + 30;
+		position.y += 80;
+	}
+	if(note.hold)
+	{
+		if(note.being_held)
+		{
+			DrawRectangle(position.x, position.y, 32, 32, BLACK);
+			DrawRectangle(position.x, position.y, (note.time_end - time) * 0.25, 32, BLUE);
+		}
+		else
+		{
+			DrawRectangle(position.x, position.y, 32, 32, BLACK);
+			DrawRectangle(position.x, position.y, (note.time - time) * 0.25, 32, SKYBLUE);
+		}
+	}
+	else
+	{
+		DrawRectangle(position.x, position.y, 32, 32, GRAY);
+		DrawRectangle(position.x, position.y, (note.time - time) * 0.25, 32, YELLOW);
+	}
+	char text[KEY_AMOUNT] = {
+		'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+		'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
+		'Z', 'X', 'C', 'V', 'B', 'N', 'M',
+	};
+	DrawText(TextFormat("%c", text[note.key]), position.x, position.y, 24, BLACK);
+}
+
+void DebugDrawGame(GameSpace* game)
 {
 	for(int i = 0; i < NOTE_LIMIT; i++)
 	{
 		Note note = game->notes[i];
-		if(!note.active)
-		{
-			continue;
-		}
-		Vector2 position = (Vector2){32, 96};
-		if(note.key < 10)
-		{
-			position.x += note.key * 40;
-		}
-		else if(note.key < 19)
-		{
-			position.x += (note.key - 10) * 40 + 10;
-			position.y += 40;
-		}
-		else
-		{
-			position.x += (note.key - 19) * 40 + 30;
-			position.y += 80;
-		}
-		if(note.hold)
-		{
-			if(note.being_held)
-			{
-				DrawRectangle(position.x, position.y, 32, 32, BLACK);
-				DrawRectangle(position.x, position.y, (note.time_end - game->time) * 0.25, 32, BLUE);
-			}
-			else
-			{
-				DrawRectangle(position.x, position.y, 32, 32, BLACK);
-				DrawRectangle(position.x, position.y, (note.time - game->time) * 0.25, 32, SKYBLUE);
-			}
-		}
-		else
-		{
-			DrawRectangle(position.x, position.y, 32, 32, GRAY);
-			DrawRectangle(position.x, position.y, (note.time - game->time) * 0.25, 32, YELLOW);
-		}
-		char text[KEY_AMOUNT] = {
-			'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
-			'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
-			'Z', 'X', 'C', 'V', 'B', 'N', 'M',
-		};
-		DrawText(TextFormat("%c", text[note.key]), position.x, position.y, 24, BLACK);
+		DebugDrawNote(note, game->time);
 	}
 	DrawText(TextFormat("%i", game->score), 32, 64, 24, BLACK);
 }

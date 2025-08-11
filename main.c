@@ -46,6 +46,7 @@ int main(void)
 				{
 					//TraceLog(LOG_INFO, "new note");
 					Note note = (Note){0};
+					note.active = true;
 					note.time = editor.current_time;
 					note.key = KeyboardToKeycode(input, bindings);
 					EditorAddNote(&editor, note);
@@ -53,6 +54,14 @@ int main(void)
 				if(IsKeyPressed(KEY_BACKSPACE))
 				{
 					EditorRemoveNote(&editor);
+				}
+				if(IsKeyDown(KEY_LEFT))
+				{
+					EditorMove(&editor, -1);
+				}
+				if(IsKeyDown(KEY_RIGHT))
+				{
+					EditorMove(&editor, 1);
 				}
 				break;
 		}
@@ -64,7 +73,7 @@ int main(void)
 		switch(scene)
 		{
 			case GAME:
-				DebugDrawNotes(&game);
+				DebugDrawGame(&game);
 				break;
 			case EDITOR:
 				DebugDrawEditor(&editor);

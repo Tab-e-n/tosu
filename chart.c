@@ -53,16 +53,17 @@ bool EditorMove(EditorChart* editor, int time)
 	{
 		while(current->next != (void*)0 && current->next->note.time < editor->current_time)
 		{
-			editor->current = current->next;
+			current = current->next;
 		}
 	}
 	if(time < 0 && current->previous != (void*)0)
 	{
 		while(current->previous != (void*)0 && current->previous->note.time > editor->current_time)
 		{
-			editor->current = current->previous;
+			current = current->previous;
 		}
 	}
+	editor->current = current;
 	return OK;
 }
 
@@ -279,15 +280,37 @@ Note IntToNote(int code)
 void DebugDrawEditor(EditorChart* editor)
 {
 	//TraceLog(LOG_INFO, "Debug Draw Editor");
+	const int NOTE_CUTOFF = 60;
 	EditorNote* current = editor->start;
 	int i = 0;
 	while(current != (void*)0)
 	{
 		//TraceLog(LOG_INFO, "%i", i);
+		/*
 		int x = 2 + i * 72;
 		DrawText(TextFormat("%i", current), x, 32, 8, BLACK);
 		DrawText(TextFormat("> %i", current->next), x, 40, 8, BLACK);
 		DrawText(TextFormat("< %i", current->previous), x, 48, 8, BLACK);
+		*/
+		Note note = current->note;
+		if(note.hold)
+		{
+			int diff = note.time - editor->current_time;
+			int diff2 = editor->current_time - note.time_end;
+			if(diff < NOTE_CUTOFF && diff2 < NOTE_CUTOFF)
+			{
+				DebugDrawNote(note, editor->current_time);
+			}
+		}
+		else
+		{
+			int diff = note.time - editor->current_time;
+			diff = diff < 0 ? -diff : diff;
+			if(diff < NOTE_CUTOFF)
+			{
+				DebugDrawNote(note, editor->current_time);
+			}
+		}
 
 		current = current->next;
 		i++;
