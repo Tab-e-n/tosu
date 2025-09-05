@@ -3,19 +3,91 @@
 #include "notes.h"
 #include "chart.h"
 
+int SizeOfChart(Chart* chart)
+{
+	return sizeof(Chart) + (sizeof(int) * chart->code_amount);
+}
+
 bool ChartReadNext(Chart* chart, GameSpace* game)
 {
 	return UNIMPLEMENTED;
 }
 
-Chart* LoadChart(const char* filename)
+ChartLoadResult LoadChart(const char* filename)
 {
-	return (void*)0;
+	int size;
+	unsigned char* file = LoadFileData(filename, &size);
+	ChartLoadResult result = (ChartLoadResult){0};
+	
+	if(file != (void*)0)
+	{
+		Chart* chart = (Chart*)malloc(size);
+		*chart = *file;
+		result.chart = chart;
+		result.success = true;
+	}
+	else
+	{
+		result.chart = (void*)0;
+		result.success = false;
+	}
+
+	UnloadFileData(file);
+
+	return result;
 }
 
 bool SaveChart(Chart* chart, const char* filename)
 {
-	return UNIMPLEMENTED;
+	bool success = false;
+	int data_size;
+	int save_size;
+	unsigned char* data_file = LoadFileData(filename, &data_size);
+	unsigned char* save_file = (void*)0;
+
+	if(data_file != (void*)0)
+	{
+		save_size = SizeOfChart(chart);
+		if(data_size != save_size)
+		{
+			save_file = (unsigned char*)realloc(data_file, save_size);
+
+			if(save_file != (void*)0)
+			{
+				Chart* save_chart = (Chart*)(save_file);
+				*save_chart = *chart;
+			}
+			else
+			{
+				save_size = data_size;
+				save_file = data_file;
+			}
+		}
+		else
+		{
+			save_size = data_size;
+			save_file = data_file;
+
+			Chart* save_chart = (Chart*)(save_file);
+			*save_chart = *chart;
+		}
+
+		success = SaveFileData(filename, save_file, save_size);
+		UnloadFileData(save_file);
+	}
+	else
+	{
+		data_size = SizeOfChart(chart);
+		data_file = (unsigned char*)malloc(data_size);
+
+		Chart* save_chart = (Chart*)(save_file);
+		*save_chart = *chart;
+
+		success = SaveFileData(filename, save_file, save_size);
+		UnloadFileData(save_file);
+	}
+
+	return success;
 }
 
 bool EditorMoveToStart(EditorChart* editor)

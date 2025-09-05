@@ -28,6 +28,12 @@ typedef struct Chart
 	int codes[];
 } Chart;
 
+typedef struct ChartLoadResult
+{
+	bool success;
+	Chart* chart;
+} ChartLoadResult;
+
 typedef struct EditorNote
 {
 	struct EditorNote* previous;
@@ -45,9 +51,10 @@ typedef struct EditorChart
 } EditorChart;
 
 
+int SizeOfChart(Chart* chart);
 bool ChartReadNext(Chart* chart, GameSpace* game);
 
-Chart* LoadChart(const char* filename);
+ChartLoadResult LoadChart(const char* filename);
 bool SaveChart(Chart* chart, const char* filename);
 
 
