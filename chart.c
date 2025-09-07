@@ -10,7 +10,20 @@ int SizeOfChart(Chart* chart)
 
 bool ChartReadNext(Chart* chart, GameSpace* game)
 {
-	return UNIMPLEMENTED;
+	bool result = OK;
+	if(game->current_note < chart->code_amount)
+	{
+		int code = chart->codes[game->current_note];
+		Note note = IntToNote(code);
+		game->current_note++;
+		if(note.hold)
+		{
+			note.time_end = chart->codes[i] >> 8;
+			game->current_note++;
+		}
+		result = GameAddNote(game, note);
+	}
+	return result;
 }
 
 ChartLoadResult LoadChart(const char* filename)

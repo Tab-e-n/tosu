@@ -57,7 +57,6 @@ bool ChartReadNext(Chart* chart, GameSpace* game);
 ChartLoadResult LoadChart(const char* filename);
 bool SaveChart(Chart* chart, const char* filename);
 
-
 bool EditorMoveToStart(EditorChart* editor); // Sets current to start
 bool EditorMoveToEnd(EditorChart* editor); // Sets current to end
 bool EditorMove(EditorChart* editor, int time); // Increases current_time, changes current_note if required
@@ -71,7 +70,7 @@ Chart* EditorToChart(EditorChart* editor);
 bool ChartToEditor(Chart* chart, EditorChart* editor);
 
 int NoteToInt(Note note);
-Note IntToNote(int note);
+Note IntToNote(int code);
 
 void DebugDrawEditor(EditorChart* editor);
 
