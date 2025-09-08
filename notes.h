@@ -14,6 +14,7 @@
 #define HIT_OK_EARLY   0b0100
 
 #define BASE_HIT_WINDOW 14
+#define NOTE_SPAWN_WINDOW 120
 
 #define NOTE_LIMIT 128
 
@@ -33,7 +34,8 @@ typedef struct Note {
 
 typedef struct GameSpace {
 	int time, score,
-	    current_note;
+	    current_note,
+	    current_code;
 	Note notes[NOTE_LIMIT];
 	char difficulty, speed;
 } GameSpace;

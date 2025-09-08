@@ -167,9 +167,11 @@ bool GameAddNote(GameSpace* game, Note note)
 	}
 	if(loops >= NOTE_LIMIT)
 	{
+		TraceLog(LOG_INFO, "GAME: couldn't add note");
 		return 1;
 	}
 	game->notes[game->current_note] = note;
+	TraceLog(LOG_INFO, "GAME: Added note");
 	return 0;
 }
 
@@ -210,7 +212,7 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
 		{
 			if(note.time_end + HitWindow(game->difficulty, 3) < game->time)
 			{
-				//TraceLog(LOG_INFO, "SCORE: Held till end");
+				TraceLog(LOG_INFO, "SCORE: Held till end");
 				game->score += HitScorePoints(HIT_PERFECT);
 				note.active = false;
 			}
@@ -219,12 +221,12 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
 				char score = NoteHoldScore(note, game->time, game->difficulty);
 				if(score)
 				{
-					//TraceLog(LOG_INFO, "SCORE: Ended hold early");
+					TraceLog(LOG_INFO, "SCORE: Ended hold early");
 					game->score += HitScorePoints(score);
 				}
 				else
 				{
-					//TraceLog(LOG_INFO, "MISS: ended hold too early");
+					TraceLog(LOG_INFO, "MISS: ended hold too early");
 				}
 				note.active = false;
 			}
@@ -233,7 +235,7 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
 		{
 			if(note.time + HitWindow(game->difficulty, 3) < game->time)
 			{
-				//TraceLog(LOG_INFO, "MISS: Didn't hit key");
+				TraceLog(LOG_INFO, "MISS: Didn't hit key");
 				note.active = false;
 			}
 			if(NotePressed(note, input, bindings))
@@ -241,7 +243,7 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
 				char score = NoteHitScore(note, game->time, game->difficulty);
 				if(score)
 				{
-					//TraceLog(LOG_INFO, "SCORE: Hit note");
+					TraceLog(LOG_INFO, "SCORE: Hit note");
 					game->score += HitScorePoints(score);
 					if(note.hold)
 					{
@@ -254,7 +256,7 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
 				}
 				else
 				{
-					//TraceLog(LOG_INFO, "Not yet in hit window");
+					TraceLog(LOG_INFO, "Not yet in hit window");
 				}
 			}
 		}
@@ -318,5 +320,6 @@ void DebugDrawGame(GameSpace* game)
 		Note note = game->notes[i];
 		DebugDrawNote(note, game->time);
 	}
-	DrawText(TextFormat("%i", game->score), 32, 64, 24, BLACK);
+	DrawText("GAMEPLAY", 32, 32, 24, BLACK);
+	DrawText(TextFormat("%i (%i)", game->score, game->time), 32, 64, 24, BLACK);
 }

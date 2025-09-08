@@ -5,25 +5,56 @@
 
 int SizeOfChart(Chart* chart)
 {
-	return sizeof(Chart) + (sizeof(int) * chart->code_amount);
+	if(chart != (void*)0)
+	{
+		return sizeof(Chart) + (sizeof(int) * chart->code_amount);
+	}
+	return sizeof(Chart);
 }
 
 bool ChartReadNext(Chart* chart, GameSpace* game)
 {
 	bool result = OK;
-	if(game->current_note < chart->code_amount)
+	if(chart == (void*)0)
 	{
-		int code = chart->codes[game->current_note];
+		return ERROR_CHART_NOT_LOADED;
+	} 
+	if(game == (void*)0)
+	{
+		return ERROR_GAMESPACE_NOT_LOADED;
+	} 
+	if(game->current_code < chart->code_amount)
+	{
+		int code = chart->codes[game->current_code];
 		Note note = IntToNote(code);
-		game->current_note++;
+		game->current_code++;
 		if(note.hold)
 		{
-			note.time_end = chart->codes[i] >> 8;
-			game->current_note++;
+			note.time_end = chart->codes[game->current_code] >> 8;
+			game->current_code++;
 		}
 		result = GameAddNote(game, note);
 	}
 	return result;
+}
+
+bool ChartShouldReadNext(Chart* chart, GameSpace* game)
+{
+	if(chart == (void*)0)
+	{
+		return false;
+	} 
+	if(game == (void*)0)
+	{
+		return false;
+	} 
+	if(game->current_code < chart->code_amount)
+	{
+		int delta = (chart->codes[game->current_code] >> 8) - game->time;
+		TraceLog(LOG_INFO, "%i", delta);
+		return delta < NOTE_SPAWN_WINDOW;
+	}
+	return false;
 }
 
 ChartLoadResult LoadChart(const char* filename)
@@ -35,7 +66,7 @@ ChartLoadResult LoadChart(const char* filename)
 	if(file != (void*)0)
 	{
 		Chart* chart = (Chart*)malloc(size);
-		*chart = *file;
+		*chart = *(Chart*)file;
 		result.chart = chart;
 		result.success = true;
 	}
@@ -112,7 +143,7 @@ bool EditorMoveToStart(EditorChart* editor)
 		return OK;
 	}
 	editor->current_time = 0.0;
-	return ERROR;
+	return OK;
 }
 
 bool EditorMoveToEnd(EditorChart* editor)
@@ -123,7 +154,7 @@ bool EditorMoveToEnd(EditorChart* editor)
 		editor->current_time = editor->current->note.time;
 		return OK;
 	}
-	return ERROR;
+	return FAIL;
 }
 
 bool EditorMove(EditorChart* editor, int time)
@@ -131,7 +162,7 @@ bool EditorMove(EditorChart* editor, int time)
 	editor->current_time += time;
 	if(editor->current == (void*)0)
 	{
-		return ERROR;
+		return OK;
 	}
 	EditorNote* current = editor->current;
 	if(time > 0 && current->next != (void*)0)
@@ -222,7 +253,7 @@ bool EditorRemoveNote(EditorChart* editor)
 	// Removes current note
 	if(editor->current == (void*)0)
 	{
-		return ERROR;
+		return FAIL;
 	}
 	EditorNote* previous;
 	EditorNote* next;
@@ -359,6 +390,7 @@ Note IntToNote(int code)
 	}
 	note.key = (code >> 3) & 0b11111;
 	note.time = code >> 8;
+	note.active = true;
 	return note;
 }
 
@@ -400,4 +432,6 @@ void DebugDrawEditor(EditorChart* editor)
 		current = current->next;
 		i++;
 	}
+	DrawText("EDITOR", 32, 32, 24, BLACK);
+	DrawText(TextFormat("%i", editor->current_time), 32, 64, 24, BLACK);
 }

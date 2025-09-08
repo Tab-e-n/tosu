@@ -7,9 +7,12 @@
 
 
 #define OK 0
-#define ERROR 1
+#define FAIL 1
 #define UNIMPLEMENTED 2
-// Might do more specific error codes if necessary
+#define ERROR 3
+#define ERROR_CHART_NOT_LOADED 4
+#define ERROR_GAMESPACE_NOT_LOADED 5
+// Should move these into a separate file
 
 /*
 shmccccc tttttttt tttttttt tttttttt
@@ -53,6 +56,7 @@ typedef struct EditorChart
 
 int SizeOfChart(Chart* chart);
 bool ChartReadNext(Chart* chart, GameSpace* game);
+bool ChartShouldReadNext(Chart* chart, GameSpace* game);
 
 ChartLoadResult LoadChart(const char* filename);
 bool SaveChart(Chart* chart, const char* filename);

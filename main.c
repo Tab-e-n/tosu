@@ -16,6 +16,7 @@ int main(void)
 
 	GameScene scene = EDITOR;
 
+	Chart* chart = (Chart*)0;
 	GameSpace game = (GameSpace){0};
 	KeycodeBindings bindings = DefaultBindings();
 	char key = 0;
@@ -27,6 +28,7 @@ int main(void)
 		switch(scene)
 		{
 			case GAME:
+				/*
 				if(game.time % 300 == 0)
 				{
 					if(GameMakeHoldNote(&game, game.time + 120, game.time + 180, key, false))
@@ -36,7 +38,18 @@ int main(void)
 					key++;
 					if(key >= KEY_AMOUNT) key = 0;
 				}
+				*/
+				while(ChartShouldReadNext(chart, &game))
+				{
+					ChartReadNext(chart, &game);
+				}
 				GameProcessNotes(&game, bindings);
+				if(IsKeyPressed(KEY_ENTER))
+				{
+					free(chart);
+					scene = EDITOR;
+					game = (GameSpace){0};
+				}
 				break;
 			case EDITOR:
 				//TraceLog(LOG_INFO, "Get Keyboard Input");
@@ -63,19 +76,30 @@ int main(void)
 				{
 					EditorMove(&editor, 1);
 				}
+				if(IsKeyPressed(KEY_ENTER))
+				{
+					chart = EditorToChart(&editor);
+					TraceLog(LOG_INFO, "%i", chart->code_amount);
+					scene = GAME;
+					game = (GameSpace){0};
+				}
 				break;
 		}
 
 		BeginDrawing();
 
-			ClearBackground(RAYWHITE);
 
+		Color bg;
 		switch(scene)
 		{
 			case GAME:
+				bg = (Color){232, 255, 232, 255};
+				ClearBackground(bg);
 				DebugDrawGame(&game);
 				break;
 			case EDITOR:
+				bg = (Color){248, 224, 255, 255};
+				ClearBackground(bg);
 				DebugDrawEditor(&editor);
 				break;
 		}
