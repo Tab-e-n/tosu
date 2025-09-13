@@ -12,6 +12,7 @@
 #define HIT_GOOD_EARLY 0b0010
 #define HIT_OK_LATE    0b1100
 #define HIT_OK_EARLY   0b0100
+#define HIT_PENALTY    0b10000
 
 #define BASE_HIT_WINDOW 14
 #define NOTE_SPAWN_WINDOW 120

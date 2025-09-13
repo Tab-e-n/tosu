@@ -80,6 +80,8 @@ int HitScorePoints(char score)
 			return 300;
 		case HIT_PERFECT:
 			return 500;
+		case HIT_PENALTY:
+			return -200;
 		default:
 			return 0;
 	}
@@ -92,11 +94,22 @@ bool NotePressed(Note note, int input, KeycodeBindings bindings)
 
 char NoteHitScore(Note note, int hit_time, char difficulty)
 {
+	int inacc = hit_time - note.time;
+
+	if(note.mine)
+	{
+		int hit_window = HitWindow(difficulty, 2);
+
+		if(inacc >= -hit_window && inacc <= hit_window)
+		{
+			return HIT_PENALTY;
+		}
+		return HIT_MISS;
+	}
+
 	int hit_perfect = HitWindow(difficulty, 1);
 	int hit_good = HitWindow(difficulty, 2);
 	int hit_ok = HitWindow(difficulty, 3);
-
-	int inacc = hit_time - note.time;
 
 	if(inacc <= hit_perfect && inacc >= -hit_perfect)
 	{
@@ -291,18 +304,23 @@ void DebugDrawNote(Note note, int time)
 	{
 		if(note.being_held)
 		{
-			DrawRectangle(position.x, position.y, 32, 32, BLACK);
+			DrawRectangle(position.x, position.y, 32, 32, GRAY);
 			DrawRectangle(position.x, position.y, (note.time_end - time) * 0.25, 32, BLUE);
 		}
 		else
 		{
-			DrawRectangle(position.x, position.y, 32, 32, BLACK);
+			DrawRectangle(position.x, position.y, 32, 32, GRAY);
 			DrawRectangle(position.x, position.y, (note.time - time) * 0.25, 32, SKYBLUE);
 		}
 	}
+	else if(note.mine)
+	{
+		DrawRectangle(position.x, position.y, 32, 32, BLACK);
+		DrawRectangle(position.x, position.y, (note.time - time) * 0.25, 32, RED);
+	}
 	else
 	{
-		DrawRectangle(position.x, position.y, 32, 32, GRAY);
+		DrawRectangle(position.x, position.y, 32, 32, LIGHTGRAY);
 		DrawRectangle(position.x, position.y, (note.time - time) * 0.25, 32, YELLOW);
 	}
 	char text[KEY_AMOUNT] = {
