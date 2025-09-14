@@ -300,6 +300,11 @@ void DebugDrawNote(Note note, int time)
 		position.x += (note.key - 19) * 40 + 30;
 		position.y += 80;
 	}
+	char text[KEY_AMOUNT] = {
+		'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+		'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
+		'Z', 'X', 'C', 'V', 'B', 'N', 'M',
+	};
 	if(note.hold)
 	{
 		if(note.being_held)
@@ -312,23 +317,20 @@ void DebugDrawNote(Note note, int time)
 			DrawRectangle(position.x, position.y, 32, 32, GRAY);
 			DrawRectangle(position.x, position.y, (note.time - time) * 0.25, 32, SKYBLUE);
 		}
+		DrawText(TextFormat("%c", text[note.key]), position.x, position.y, 24, BLACK);
 	}
 	else if(note.mine)
 	{
 		DrawRectangle(position.x, position.y, 32, 32, BLACK);
 		DrawRectangle(position.x, position.y, (note.time - time) * 0.25, 32, RED);
+		DrawText(TextFormat("%c", text[note.key]), position.x, position.y, 24, WHITE);
 	}
 	else
 	{
 		DrawRectangle(position.x, position.y, 32, 32, LIGHTGRAY);
 		DrawRectangle(position.x, position.y, (note.time - time) * 0.25, 32, YELLOW);
+		DrawText(TextFormat("%c", text[note.key]), position.x, position.y, 24, BLACK);
 	}
-	char text[KEY_AMOUNT] = {
-		'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
-		'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
-		'Z', 'X', 'C', 'V', 'B', 'N', 'M',
-	};
-	DrawText(TextFormat("%c", text[note.key]), position.x, position.y, 24, BLACK);
 }
 
 void DebugDrawGame(GameSpace* game)
