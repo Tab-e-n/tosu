@@ -92,9 +92,9 @@ bool NotePressed(Note note, int input, KeycodeBindings bindings)
 	return input & KeycodeToKeyboard(note.key, bindings);
 }
 
-char NoteHitScore(Note note, int hit_time, char difficulty)
+char NoteHitScore(Note note, int hit_time, char difficulty, int offset)
 {
-	int inacc = hit_time - note.time;
+	int inacc = (hit_time + offset) - note.time;
 
 	if(note.mine)
 	{
@@ -253,7 +253,7 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
 			}
 			if(NotePressed(note, input, bindings))
 			{
-				char score = NoteHitScore(note, game->time, game->difficulty);
+				char score = NoteHitScore(note, game->time, game->difficulty, game->offset);
 				if(score)
 				{
 					TraceLog(LOG_INFO, "SCORE: Hit note");

@@ -34,7 +34,7 @@ typedef struct Note {
 } Note;
 
 typedef struct GameSpace {
-	int time, score,
+	int time, score, offset,
 	    current_note,
 	    current_code;
 	Note notes[NOTE_LIMIT];
@@ -53,7 +53,7 @@ int HitWindow(int difficulty, int hit);
 int HitScorePoints(char score);
 
 bool NotePressed(Note note, int input, KeycodeBindings bindings);
-char NoteHitScore(Note note, int hit_time, char difficulty);
+char NoteHitScore(Note note, int hit_time, char difficulty, int offset);
 char NoteHoldScore(Note note, int release, char difficulty);
 
 bool GameAddNote(GameSpace* game, Note note);
