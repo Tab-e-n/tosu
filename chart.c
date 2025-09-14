@@ -57,6 +57,18 @@ bool ChartShouldReadNext(Chart* chart, GameSpace* game)
 	return false;
 }
 
+bool CopyChart(Chart* copy, Chart* chart)
+{
+	copy->difficulty = chart->difficulty;
+	copy->speed = chart->speed;
+	copy->code_amount = chart->code_amount;
+	for(int i = 0; i < chart->code_amount; i++)
+	{
+		copy->codes[i] = chart->codes[i];
+	}
+	return OK;
+}
+
 ChartLoadResult LoadChart(const char* filename)
 {
 	int size;
@@ -66,7 +78,7 @@ ChartLoadResult LoadChart(const char* filename)
 	if(file != (void*)0)
 	{
 		Chart* chart = (Chart*)malloc(size);
-		*chart = *(Chart*)file;
+		CopyChart(chart, (Chart*)file);
 		result.chart = chart;
 		result.success = true;
 	}
@@ -99,7 +111,8 @@ bool SaveChart(Chart* chart, const char* filename)
 			if(save_file != (void*)0)
 			{
 				Chart* save_chart = (Chart*)(save_file);
-				*save_chart = *chart;
+				CopyChart(save_chart, chart);
+				//*save_chart = *chart;
 			}
 			else
 			{
@@ -113,7 +126,7 @@ bool SaveChart(Chart* chart, const char* filename)
 			save_file = data_file;
 
 			Chart* save_chart = (Chart*)(save_file);
-			*save_chart = *chart;
+			CopyChart(save_chart, chart);
 		}
 
 		success = SaveFileData(filename, save_file, save_size);
@@ -121,11 +134,11 @@ bool SaveChart(Chart* chart, const char* filename)
 	}
 	else
 	{
-		data_size = SizeOfChart(chart);
-		data_file = (unsigned char*)malloc(data_size);
+		save_size = SizeOfChart(chart);
+		save_file = (unsigned char*)malloc(save_size);
 
 		Chart* save_chart = (Chart*)(save_file);
-		*save_chart = *chart;
+		CopyChart(save_chart, chart);
 
 		success = SaveFileData(filename, save_file, save_size);
 		UnloadFileData(save_file);
@@ -287,7 +300,6 @@ bool EditorRemoveNote(EditorChart* editor)
 
 bool EditorClearNotes(EditorChart* editor)
 {
-	EditorMoveToStart(editor);
 	editor->start = (void*)0;
 	editor->end = (void*)0;
 	while(editor->current != (void*)0)
@@ -296,11 +308,13 @@ bool EditorClearNotes(EditorChart* editor)
 		free(editor->current);
 		editor->current = next;
 	}
+	EditorMoveToStart(editor);
 	return OK;
 }
 
 Chart* EditorToChart(EditorChart* editor)
 {
+	TraceLog(LOG_INFO, "Converting EditorChart to Chart");
 	int code_amount = 0;
 	EditorNote* current = editor->start;
 	while(current != (void*)0)
@@ -344,6 +358,7 @@ Chart* EditorToChart(EditorChart* editor)
 
 bool ChartToEditor(Chart* chart, EditorChart* editor)
 {
+	TraceLog(LOG_INFO, "Converting Chart to EditorChart");
 	int i = 0;
 	while(i < chart->code_amount)
 	{
@@ -358,6 +373,7 @@ bool ChartToEditor(Chart* chart, EditorChart* editor)
 	}
 	editor->difficulty = chart->difficulty;
 	editor->speed = chart->speed;
+	editor->current_time = 0;
 	return OK;
 }
 
@@ -374,6 +390,7 @@ int NoteToInt(Note note)
 	}
 	code += note.key << 3;
 	code += note.time << 8;
+	//TraceLog(LOG_INFO, "%i, h%i m%i k%i t%i", code, note.hold, note.mine, note.key, note.time);
 	return code;
 }
 
@@ -391,6 +408,7 @@ Note IntToNote(int code)
 	note.key = (code >> 3) & 0b11111;
 	note.time = code >> 8;
 	note.active = true;
+	//TraceLog(LOG_INFO, "%i, h%i m%i k%i t%i", code, note.hold, note.mine, note.key, note.time);
 	return note;
 }
 

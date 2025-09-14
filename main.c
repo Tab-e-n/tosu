@@ -80,6 +80,33 @@ int main(void)
 			}
 			if(mode == MAIN)
 			{
+				if(IsKeyPressed(KEY_ENTER))
+				{
+					chart = EditorToChart(&editor);
+					TraceLog(LOG_INFO, "%i", chart->code_amount);
+					scene = GAME;
+					game = (GameSpace){0};
+				}
+				if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
+				{
+					Chart* temp_chart = EditorToChart(&editor);
+					SaveChart(temp_chart, "test.chart");
+					free(temp_chart);
+				}
+				if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_L))
+				{
+					ChartLoadResult result = LoadChart("test.chart");
+					if(result.success)
+					{
+						EditorClearNotes(&editor);
+						ChartToEditor(result.chart, &editor);
+					}
+					free(result.chart);
+				}
+				if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_O))
+				{
+					EditorClearNotes(&editor);
+				}
 				if(IsKeyPressed(KEY_N))
 				{
 					mode = INSERT_NORMAL;
@@ -105,13 +132,6 @@ int main(void)
 			{
 				EditorMove(&editor, 1);
 			}
-			if(IsKeyPressed(KEY_ENTER))
-			{
-				chart = EditorToChart(&editor);
-				TraceLog(LOG_INFO, "%i", chart->code_amount);
-				scene = GAME;
-				game = (GameSpace){0};
-			}
 			if(IsKeyPressed(KEY_ESCAPE))
 			{
 				mode = MAIN;
@@ -135,6 +155,18 @@ int main(void)
 				bg = (Color){248, 224, 255, 255};
 				ClearBackground(bg);
 				DebugDrawEditor(&editor);
+				if(mode == INSERT_NORMAL)
+				{
+					DrawText("INSERT NORMAL", 144, 32, 24, BLACK);
+				}
+				if(mode == INSERT_HOLD)
+				{
+					DrawText("INSERT HOLD", 144, 32, 24, BLACK);
+				}
+				if(mode == INSERT_MINE)
+				{
+					DrawText("INSERT MINE", 144, 32, 24, BLACK);
+				}
 				break;
 		}
 
