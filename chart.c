@@ -170,6 +170,28 @@ bool EditorMoveToEnd(EditorChart* editor)
 	return FAIL;
 }
 
+bool EditorMoveToNext(EditorChart* editor)
+{
+	if(editor->current->next != (void*)0)
+	{
+		editor->current = editor->current->next;
+		editor->current_time = editor->current->note.time;
+		return OK;
+	}
+	return FAIL;
+}
+
+bool EditorMoveToPrevious(EditorChart* editor)
+{
+	if(editor->current->previous != (void*)0)
+	{
+		editor->current = editor->current->previous;
+		editor->current_time = editor->current->note.time;
+		return OK;
+	}
+	return FAIL;
+}
+
 bool EditorMove(EditorChart* editor, int time)
 {
 	editor->current_time += time;
@@ -201,6 +223,42 @@ bool EditorMoveToTimecode(EditorChart* editor, int timecode)
 	return EditorMove(editor, timecode - editor->current_time);
 }
 
+bool EditorTiming(EditorChart* editor, bool reset)
+{
+	if(reset)
+	{
+		editor->move_timer = MOVE_DELAY_FRAMES * 2;
+		return false;
+	}
+	if(editor->move_timer == MOVE_DELAY_FRAMES * 2)
+	{
+		editor->move_timer--;
+		return true;
+	}
+	if(editor->move_timer <= 0)
+	{
+		editor->move_timer = MOVE_DELAY_FRAMES;
+		return true;
+	}
+	editor->move_timer--;
+	return false;
+}
+
+bool EditorMoveTimed(EditorChart* editor, int time)
+{
+	if(time == 0)
+	{
+		EditorTiming(editor, true);
+		return OK;
+	}
+	if(EditorTiming(editor, false))
+	{
+		return EditorMove(editor, time);
+	}
+	return OK;
+
+}
+
 bool EditorAddNote(EditorChart* editor, Note note)
 {
 	//TraceLog(LOG_INFO, "Editor Add Note malloc");
@@ -219,6 +277,7 @@ bool EditorAddNote(EditorChart* editor, Note note)
 		//TraceLog(LOG_INFO, "current exists");
 		if(editor->current->note.time <= enote->note.time)
 		{
+			// Adding the note after current
 			enote->previous = editor->current;
 			enote->next = editor->current->next;
 
@@ -226,6 +285,10 @@ bool EditorAddNote(EditorChart* editor, Note note)
 			if(enote->next != (void*)0)
 			{
 				enote->next->previous = enote;
+			}
+			else
+			{
+				editor->end = enote;
 			}
 		}
 		else
@@ -238,6 +301,10 @@ bool EditorAddNote(EditorChart* editor, Note note)
 			if(enote->previous != (void*)0)
 			{
 				enote->previous->next = enote;
+			}
+			else
+			{
+				editor->start = enote;
 			}
 		}
 	}
@@ -412,6 +479,30 @@ Note IntToNote(int code)
 	return note;
 }
 
+void PrintEditor(EditorChart* editor)
+{
+	Note note;
+	if(editor->start != (void*)0)
+	{
+		note = editor->start->note;
+		TraceLog(LOG_INFO, "start: h%i m%i k%i t%i", note.hold, note.mine, note.key, note.time);
+	}
+	EditorNote* current = editor->start;
+	int i = 0;
+	while(current != (void*)0)
+	{
+		note = current->note;
+		TraceLog(LOG_INFO, "%i, h%i m%i k%i t%i", i, note.hold, note.mine, note.key, note.time);
+		current = current->next;
+		i++;
+	}
+	if(editor->end != (void*)0)
+	{
+		note = editor->end->note;
+		TraceLog(LOG_INFO, "end: h%i m%i k%i t%i", note.hold, note.mine, note.key, note.time);
+	}
+}
+
 void DebugDrawEditor(EditorChart* editor)
 {
 	//TraceLog(LOG_INFO, "Debug Draw Editor");
@@ -428,6 +519,10 @@ void DebugDrawEditor(EditorChart* editor)
 		DrawText(TextFormat("< %i", current->previous), x, 48, 8, BLACK);
 		*/
 		Note note = current->note;
+		if(current == editor->current)
+		{
+			DebugDrawNoteOutline(note.key);
+		}
 		if(note.hold)
 		{
 			int diff = note.time - editor->current_time;

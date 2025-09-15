@@ -333,6 +333,27 @@ void DebugDrawNote(Note note, int time)
 	}
 }
 
+void DebugDrawNoteOutline(char key)
+{
+	Vector2 position = (Vector2){28, 92};
+	if(key < 10)
+	{
+		position.x += key * 40;
+	}
+	else if(key < 19)
+	{
+		position.x += (key - 10) * 40 + 10;
+		position.y += 40;
+	}
+	else
+	{
+		position.x += (key - 19) * 40 + 30;
+		position.y += 80;
+	}
+	DrawRectangle(position.x, position.y, 40, 40, BLACK);
+	DrawRectangle(position.x + 2, position.y + 2, 36, 36, RAYWHITE);
+}
+
 void DebugDrawGame(GameSpace* game)
 {
 	for(int i = 0; i < NOTE_LIMIT; i++)

@@ -107,6 +107,10 @@ int main(void)
 				{
 					EditorClearNotes(&editor);
 				}
+				if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_P))
+				{
+					PrintEditor(&editor);
+				}
 				if(IsKeyPressed(KEY_N))
 				{
 					mode = INSERT_NORMAL;
@@ -124,13 +128,48 @@ int main(void)
 				}
 			}
 			// GENERIC EDITOR
-			if(IsKeyDown(KEY_LEFT))
+			if(IsKeyDown(KEY_LEFT_CONTROL))
 			{
-				EditorMove(&editor, -1);
+				if(IsKeyPressed(KEY_LEFT))
+				{
+					EditorMoveToStart(&editor);
+				}
+				if(IsKeyPressed(KEY_RIGHT))
+				{
+					EditorMoveToEnd(&editor);
+				}
 			}
-			if(IsKeyDown(KEY_RIGHT))
+			else
 			{
-				EditorMove(&editor, 1);
+				char speed = MOVE_DELAY_FRAMES;
+				if(IsKeyDown(KEY_LEFT_SHIFT))
+				{
+					speed *= 0.33334;
+				}
+				if(IsKeyDown(KEY_LEFT_ALT))
+				{
+					speed *= 4;
+				}
+				if(IsKeyDown(KEY_LEFT))
+				{
+					EditorMoveTimed(&editor, -speed);
+				}
+				if(IsKeyDown(KEY_RIGHT))
+				{
+					EditorMoveTimed(&editor, speed);
+				}
+			}
+			if(IsKeyDown(KEY_UP) && EditorTiming(&editor, false))
+			{
+				EditorMoveToNext(&editor);
+			}
+			if(IsKeyDown(KEY_DOWN) && EditorTiming(&editor, false))
+			{
+				EditorMoveToPrevious(&editor);
+			}
+			if(!IsKeyDown(KEY_LEFT) && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN))
+			{
+				EditorTiming(&editor, true);
 			}
 			if(IsKeyPressed(KEY_ESCAPE))
 			{
