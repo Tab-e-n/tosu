@@ -62,7 +62,7 @@ bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, bool mine);
 void GameProcessNotes(GameSpace* game, KeycodeBindings bindings);
 
 void DebugDrawNote(Note note, int time);
-void DebugDrawNoteOutline(char key);
+void DebugDrawNoteOutline(char key, Color color);
 void DebugDrawGame(GameSpace* game);
 
 #endif

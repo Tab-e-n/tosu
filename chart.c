@@ -521,7 +521,7 @@ void DebugDrawEditor(EditorChart* editor)
 		Note note = current->note;
 		if(current == editor->current)
 		{
-			DebugDrawNoteOutline(note.key);
+			DebugDrawNoteOutline(note.key, BLACK);
 		}
 		if(note.hold)
 		{

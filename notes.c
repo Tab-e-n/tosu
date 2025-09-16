@@ -307,7 +307,7 @@ void DebugDrawNote(Note note, int time)
 	};
 	if(note.hold)
 	{
-		if(note.being_held)
+		if(note.time < time)
 		{
 			DrawRectangle(position.x, position.y, 32, 32, GRAY);
 			DrawRectangle(position.x, position.y, (note.time_end - time) * 0.25, 32, BLUE);
@@ -333,7 +333,7 @@ void DebugDrawNote(Note note, int time)
 	}
 }
 
-void DebugDrawNoteOutline(char key)
+void DebugDrawNoteOutline(char key, Color color)
 {
 	Vector2 position = (Vector2){28, 92};
 	if(key < 10)
@@ -350,7 +350,7 @@ void DebugDrawNoteOutline(char key)
 		position.x += (key - 19) * 40 + 30;
 		position.y += 80;
 	}
-	DrawRectangle(position.x, position.y, 40, 40, BLACK);
+	DrawRectangle(position.x, position.y, 40, 40, color);
 	DrawRectangle(position.x + 2, position.y + 2, 36, 36, RAYWHITE);
 }
 

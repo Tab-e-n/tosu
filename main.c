@@ -25,6 +25,7 @@ int main(void)
 
 	EditorChart editor = (EditorChart){0};
 	EditorMode mode = MAIN;
+	Note hold_note = (Note){0};
 
 	while(!WindowShouldClose())
 	{
@@ -73,9 +74,22 @@ int main(void)
 					}
 					EditorAddNote(&editor, note);
 				}
-				if(IsKeyPressed(KEY_BACKSPACE))
+			}
+			if(mode == INSERT_HOLD)
+			{
+				if(input && !hold_note.active)
 				{
-					EditorRemoveNote(&editor);
+					hold_note = (Note){0};
+					hold_note.active = true;
+					hold_note.time = editor.current_time;
+					hold_note.key = KeyboardToKeycode(input, bindings);
+					hold_note.hold = true;
+				}
+				else if(input && hold_note.active)
+				{
+					hold_note.time_end = editor.current_time;
+					EditorAddNote(&editor, hold_note);
+					hold_note.active = false;
 				}
 			}
 			if(mode == MAIN)
@@ -83,9 +97,10 @@ int main(void)
 				if(IsKeyPressed(KEY_ENTER))
 				{
 					chart = EditorToChart(&editor);
-					TraceLog(LOG_INFO, "%i", chart->code_amount);
+					//TraceLog(LOG_INFO, "%i", chart->code_amount);
 					scene = GAME;
 					game = (GameSpace){0};
+					game.time = -60;
 				}
 				if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
 				{
@@ -128,6 +143,10 @@ int main(void)
 				}
 			}
 			// GENERIC EDITOR
+			if(IsKeyPressed(KEY_BACKSPACE))
+			{
+				EditorRemoveNote(&editor);
+			}
 			if(IsKeyDown(KEY_LEFT_CONTROL))
 			{
 				if(IsKeyPressed(KEY_LEFT))
@@ -193,6 +212,10 @@ int main(void)
 			case EDITOR:
 				bg = (Color){248, 224, 255, 255};
 				ClearBackground(bg);
+				if(hold_note.active)
+				{
+					DebugDrawNoteOutline(hold_note.key, BLUE);
+				}
 				DebugDrawEditor(&editor);
 				if(mode == INSERT_NORMAL)
 				{
