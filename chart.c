@@ -30,7 +30,7 @@ bool ChartReadNext(Chart* chart, GameSpace* game)
 		game->current_code++;
 		if(note.hold)
 		{
-			note.time_end = chart->codes[game->current_code] >> 8;
+			note.time_end = chart->codes[game->current_code] >> TIMECODE_SHIFT;
 			game->current_code++;
 		}
 		result = GameAddNote(game, note);
@@ -50,7 +50,7 @@ bool ChartShouldReadNext(Chart* chart, GameSpace* game)
 	} 
 	if(game->current_code < chart->code_amount)
 	{
-		int delta = (chart->codes[game->current_code] >> 8) - game->time;
+		int delta = (chart->codes[game->current_code] >> TIMECODE_SHIFT) - game->time;
 		TraceLog(LOG_INFO, "%i", delta);
 		return delta < NOTE_SPAWN_WINDOW;
 	}
@@ -412,7 +412,7 @@ Chart* EditorToChart(EditorChart* editor)
 		if(current->note.hold)
 		{
 			code = code & 0b11111111;
-			code += current->note.time_end << 8;
+			code += current->note.time_end << TIMECODE_SHIFT;
 			chart->codes[code_amount] = code;
 			code_amount++;
 		}
@@ -433,7 +433,7 @@ bool ChartToEditor(Chart* chart, EditorChart* editor)
 		i++;
 		if(note.hold)
 		{
-			note.time_end = chart->codes[i] >> 8;
+			note.time_end = chart->codes[i] >> TIMECODE_SHIFT;
 			i++;
 		}
 		EditorAddNote(editor, note);
@@ -456,7 +456,8 @@ int NoteToInt(Note note)
 		code += 0b100;
 	}
 	code += note.key << 3;
-	code += note.time << 8;
+	code += note.color << 8;
+	code += note.time << TIMECODE_SHIFT;
 	//TraceLog(LOG_INFO, "%i, h%i m%i k%i t%i", code, note.hold, note.mine, note.key, note.time);
 	return code;
 }
@@ -473,7 +474,8 @@ Note IntToNote(int code)
 		note.mine = true;
 	}
 	note.key = (code >> 3) & 0b11111;
-	note.time = code >> 8;
+	note.color = (code >> 8) & 0b11;
+	note.time = code >> TIMECODE_SHIFT;
 	note.active = true;
 	//TraceLog(LOG_INFO, "%i, h%i m%i k%i t%i", code, note.hold, note.mine, note.key, note.time);
 	return note;
@@ -506,6 +508,10 @@ void PrintEditor(EditorChart* editor)
 void DebugDrawEditor(EditorChart* editor)
 {
 	//TraceLog(LOG_INFO, "Debug Draw Editor");
+	if(editor->current != (void*)0)
+	{
+		DebugDrawNoteOutline(editor->current->note, BLACK);
+	}
 	const int NOTE_CUTOFF = 60;
 	EditorNote* current = editor->start;
 	int i = 0;
@@ -519,10 +525,6 @@ void DebugDrawEditor(EditorChart* editor)
 		DrawText(TextFormat("< %i", current->previous), x, 48, 8, BLACK);
 		*/
 		Note note = current->note;
-		if(current == editor->current)
-		{
-			DebugDrawNoteOutline(note.key, BLACK);
-		}
 		if(note.hold)
 		{
 			int diff = note.time - editor->current_time;

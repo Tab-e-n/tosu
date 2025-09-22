@@ -1,0 +1,10 @@
+When loading level
+ChangeDirectory() to the levels dir
+Custom assets can get loaded with static paths this way.
+When done, go back up
+
+Notes
+Decide how they should look
+Note colors, how they are stored and how they are inputed in editor
+
+Editing placed notes

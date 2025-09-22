@@ -188,17 +188,18 @@ bool GameAddNote(GameSpace* game, Note note)
 	return 0;
 }
 
-bool GameMakeNote(GameSpace* game, int time, char key, bool mine)
+bool GameMakeNote(GameSpace* game, int time, char key, char color, bool mine)
 {
 	Note note = (Note){0};
 	note.active = true;
 	note.time = time;
 	note.key = key;
+	note.color = color;
 	note.mine = mine;
 	return GameAddNote(game, note);
 }
 
-bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, bool mine)
+bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, char color, bool mine)
 {
 	Note note = (Note){0};
 	note.active = true;
@@ -206,6 +207,7 @@ bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, bool mine)
 	note.time = start;
 	note.time_end = end;
 	note.key = key;
+	note.color = color;
 	note.mine = mine;
 	return GameAddNote(game, note);
 }
@@ -333,25 +335,26 @@ void DebugDrawNote(Note note, int time)
 	}
 }
 
-void DebugDrawNoteOutline(char key, Color color)
+void DebugDrawNoteOutline(Note note, Color color)
 {
 	Vector2 position = (Vector2){28, 92};
-	if(key < 10)
+	if(note.key < 10)
 	{
-		position.x += key * 40;
+		position.x += note.key * 40;
 	}
-	else if(key < 19)
+	else if(note.key < 19)
 	{
-		position.x += (key - 10) * 40 + 10;
+		position.x += (note.key - 10) * 40 + 10;
 		position.y += 40;
 	}
 	else
 	{
-		position.x += (key - 19) * 40 + 30;
+		position.x += (note.key - 19) * 40 + 30;
 		position.y += 80;
 	}
 	DrawRectangle(position.x, position.y, 40, 40, color);
 	DrawRectangle(position.x + 2, position.y + 2, 36, 36, RAYWHITE);
+	DrawText(TextFormat("%i", note.color), position.x - 16, position.y, 24, BLACK);
 }
 
 void DebugDrawGame(GameSpace* game)

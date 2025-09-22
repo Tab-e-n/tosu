@@ -30,7 +30,7 @@ typedef struct Note {
 	     mine,
 	     being_held;
 	int time, time_end;
-	char key;
+	char key, color;
 } Note;
 
 typedef struct GameSpace {
@@ -57,12 +57,12 @@ char NoteHitScore(Note note, int hit_time, char difficulty, int offset);
 char NoteHoldScore(Note note, int release, char difficulty);
 
 bool GameAddNote(GameSpace* game, Note note);
-bool GameMakeNote(GameSpace* game, int time, char key, bool mine);
-bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, bool mine);
+bool GameMakeNote(GameSpace* game, int time, char key, char color, bool mine);
+bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, char color, bool mine);
 void GameProcessNotes(GameSpace* game, KeycodeBindings bindings);
 
 void DebugDrawNote(Note note, int time);
-void DebugDrawNoteOutline(char key, Color color);
+void DebugDrawNoteOutline(Note note, Color color);
 void DebugDrawGame(GameSpace* game);
 
 #endif

@@ -26,6 +26,7 @@ int main(void)
 	EditorChart editor = (EditorChart){0};
 	EditorMode mode = MAIN;
 	Note hold_note = (Note){0};
+	char current_color = 0;
 
 	while(!WindowShouldClose())
 	{
@@ -68,6 +69,7 @@ int main(void)
 					note.active = true;
 					note.time = editor.current_time;
 					note.key = KeyboardToKeycode(input, bindings);
+					note.color = current_color;
 					if(mode == INSERT_MINE)
 					{
 						note.mine = true;
@@ -83,6 +85,7 @@ int main(void)
 					hold_note.active = true;
 					hold_note.time = editor.current_time;
 					hold_note.key = KeyboardToKeycode(input, bindings);
+					hold_note.color = current_color;
 					hold_note.hold = true;
 				}
 				else if(input && hold_note.active)
@@ -146,6 +149,22 @@ int main(void)
 			if(IsKeyPressed(KEY_BACKSPACE))
 			{
 				EditorRemoveNote(&editor);
+			}
+			if(IsKeyPressed(KEY_ONE))
+			{
+				current_color = 0;
+			}
+			if(IsKeyPressed(KEY_TWO))
+			{
+				current_color = 1;
+			}
+			if(IsKeyPressed(KEY_THREE))
+			{
+				current_color = 2;
+			}
+			if(IsKeyPressed(KEY_FOUR))
+			{
+				current_color = 3;
 			}
 			if(IsKeyDown(KEY_LEFT_CONTROL))
 			{
@@ -214,7 +233,8 @@ int main(void)
 				ClearBackground(bg);
 				if(hold_note.active)
 				{
-					DebugDrawNoteOutline(hold_note.key, BLUE);
+					DebugDrawNoteOutline(hold_note, BLUE);
+					DrawText(TextFormat("(%i)", hold_note.time), 96, 64, 24, BLUE);
 				}
 				DebugDrawEditor(&editor);
 				if(mode == INSERT_NORMAL)

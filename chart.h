@@ -15,15 +15,17 @@
 // Should move these into a separate file
 
 #define MOVE_DELAY_FRAMES 15
+#define TIMECODE_SHIFT 10
 
 /*
-shmccccc tttttttt tttttttt tttttttt
+shmkkkkk cctttttt tttttttt tttttttt
 
 s - Unused bit (will probably be used for non-note objects)
 h - Is note a hold note
 m - Is note a mine
-c - The notes key
+k - The notes key
 t - The notes timecode
+c - The notes color
 */
 
 typedef struct Chart
