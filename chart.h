@@ -30,31 +30,31 @@ c - The notes color
 
 typedef struct Chart
 {
-	char difficulty, speed;
-	int code_amount;
-	int codes[];
+    char difficulty, speed;
+    int code_amount;
+    int codes[];
 } Chart;
 
 typedef struct ChartLoadResult
 {
-	bool success;
-	Chart* chart;
+    bool success;
+    Chart* chart;
 } ChartLoadResult;
 
 typedef struct EditorNote
 {
-	struct EditorNote* previous;
-	struct EditorNote* next;
-	Note note;
+    struct EditorNote* previous;
+    struct EditorNote* next;
+    Note note;
 } EditorNote;
 
 typedef struct EditorChart
 {
-	EditorNote* start;
-	EditorNote* end;
-	EditorNote* current;
-	int current_time;
-	char difficulty, speed, move_timer;
+    EditorNote* start;
+    EditorNote* end;
+    EditorNote* current;
+    int current_time;
+    char difficulty, speed, move_timer;
 } EditorChart;
 
 

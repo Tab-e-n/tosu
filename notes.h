@@ -21,24 +21,24 @@
 
 
 typedef struct KeycodeBindings {
-	int codes[KEY_AMOUNT];
+    int codes[KEY_AMOUNT];
 } KeycodeBindings;
 
 typedef struct Note {
-	bool active,
-	     hold,
-	     mine,
-	     being_held;
-	int time, time_end;
-	char key, color;
+    bool active,
+         hold,
+         mine,
+         being_held;
+    int time, time_end;
+    char key, color;
 } Note;
 
 typedef struct GameSpace {
-	int time, score, offset,
-	    current_note,
-	    current_code;
-	Note notes[NOTE_LIMIT];
-	char difficulty, speed;
+    int time, score, offset,
+        current_note,
+        current_code;
+    Note notes[NOTE_LIMIT];
+    char difficulty, speed;
 } GameSpace;
 
 

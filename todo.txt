@@ -1,10 +1,18 @@
-When loading level
+LEVEL FOLDER
+file listing all difficulties
+chart file for each difficulty
+background
+song.mp3 or ogg, i'll decide later
+folder for custom textures, replace default
+
+WHEN LOADING LEVEL
 ChangeDirectory() to the levels dir
 Custom assets can get loaded with static paths this way.
 When done, go back up
 
-Notes
-Decide how they should look
-Note colors, how they are stored and how they are inputed in editor
-
+Notes - Decide how they should look
 Editing placed notes
+Playing songs
+Note hit sound
+Ranks
+Accuracy
