@@ -87,6 +87,23 @@ int HitScorePoints(char score)
     }
 }
 
+double HitAccuracy(char score)
+{
+    switch(score)
+    {
+        case HIT_OK_LATE:
+        case HIT_OK_EARLY:
+            return 0.4;
+        case HIT_GOOD_LATE:
+        case HIT_GOOD_EARLY:
+            return 0.8;
+        case HIT_PERFECT:
+            return 1.0;
+        default:
+            return 0.0;
+    }
+}
+
 bool NotePressed(Note note, int input, KeycodeBindings bindings)
 {
     return input & KeycodeToKeyboard(note.key, bindings);
@@ -166,6 +183,32 @@ char NoteHoldScore(Note note, int release, char difficulty)
     return HIT_MISS;
 }
 
+GameSpace GameInit(void)
+{
+    GameSpace game = (GameSpace){0};
+    //game.accuracy_mult = 1;
+    return game;
+}
+
+void GameAddAccuracy(GameSpace* game, double acc)
+{
+    game->accuracy_sum += acc;
+    if(game->accuracy_mult == 0.0)
+    {
+	game->accuracy_mult = 1.0;
+    }
+    else
+    {
+	game->accuracy_mult /= game->accuracy_mult + 1;
+    }
+    TraceLog(LOG_INFO, "Acc: %g %g", game->accuracy_sum, game->accuracy_mult);
+}
+
+double GameGetAccuracy(GameSpace* game)
+{
+    return game->accuracy_sum * game->accuracy_mult;
+}
+
 bool GameAddNote(GameSpace* game, Note note)
 {
     int loops = 0;
@@ -229,6 +272,7 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
             {
                 TraceLog(LOG_INFO, "SCORE: Held till end");
                 game->score += HitScorePoints(HIT_PERFECT);
+		GameAddAccuracy(game, HitAccuracy(HIT_PERFECT));
                 note.active = false;
             }
             else if(NotePressed(note, release, bindings))
@@ -238,6 +282,7 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
                 {
                     TraceLog(LOG_INFO, "SCORE: Ended hold early");
                     game->score += HitScorePoints(score);
+		    GameAddAccuracy(game, HitAccuracy(score));
                 }
                 else
                 {
@@ -260,6 +305,8 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
                 {
                     TraceLog(LOG_INFO, "SCORE: Hit note");
                     game->score += HitScorePoints(score);
+		    GameAddAccuracy(game, HitAccuracy(score));
+
                     if(note.hold)
                     {
                         note.being_held = true;
@@ -365,5 +412,7 @@ void DebugDrawGame(GameSpace* game)
         DebugDrawNote(note, game->time);
     }
     DrawText("GAMEPLAY", 32, 32, 24, BLACK);
-    DrawText(TextFormat("%i (%i)", game->score, game->time), 32, 64, 24, BLACK);
+    DrawText(TextFormat("%i", game->score), 32, 64, 24, BLACK);
+    DrawText(TextFormat("%i", game->time), 160, 64, 24, BLACK);
+    DrawText(TextFormat("%.3f", GameGetAccuracy(game)), 288, 64, 24, BLACK);
 }

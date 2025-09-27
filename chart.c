@@ -51,7 +51,6 @@ bool ChartShouldReadNext(Chart* chart, GameSpace* game)
     if(game->current_code < chart->code_amount)
     {
         int delta = (chart->codes[game->current_code] >> TIMECODE_SHIFT) - game->time;
-        TraceLog(LOG_INFO, "%i", delta);
         return delta < NOTE_SPAWN_WINDOW;
     }
     return false;

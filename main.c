@@ -19,7 +19,7 @@ int main(void)
     GameScene scene = EDITOR;
 
     Chart* chart = (Chart*)0;
-    GameSpace game = (GameSpace){0};
+    GameSpace game = GameInit();
     KeycodeBindings bindings = DefaultBindings();
     char key = 0;
 
@@ -33,17 +33,6 @@ int main(void)
         switch(scene)
         {
         case GAME:
-            /*
-            if(game.time % 300 == 0)
-            {
-                if(GameMakeHoldNote(&game, game.time + 120, game.time + 180, key, false))
-                {
-                    //TraceLog(LOG_WARNING, "No more space for notes");
-                }
-                key++;
-                if(key >= KEY_AMOUNT) key = 0;
-            }
-            */
             while(ChartShouldReadNext(chart, &game))
             {
                 ChartReadNext(chart, &game);
@@ -53,18 +42,15 @@ int main(void)
             {
                 free(chart);
                 scene = EDITOR;
-                game = (GameSpace){0};
+                game = GameInit();
             }
             break;
         case EDITOR:
-            //TraceLog(LOG_INFO, "Get Keyboard Input");
             int input = GetKeyboardInput();
-            //TraceLog(LOG_INFO, "%i", input);
             if(mode == INSERT_NORMAL || mode == INSERT_MINE)
             {
                 if(input)
                 {
-                    //TraceLog(LOG_INFO, "new note");
                     Note note = (Note){0};
                     note.active = true;
                     note.time = editor.current_time;
@@ -100,9 +86,8 @@ int main(void)
                 if(IsKeyPressed(KEY_ENTER))
                 {
                     chart = EditorToChart(&editor);
-                    //TraceLog(LOG_INFO, "%i", chart->code_amount);
                     scene = GAME;
-                    game = (GameSpace){0};
+                    game = GameInit();
                     game.time = -60;
                 }
                 if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))

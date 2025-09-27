@@ -37,6 +37,7 @@ typedef struct GameSpace {
     int time, score, offset,
         current_note,
         current_code;
+    double accuracy_sum, accuracy_mult;
     Note notes[NOTE_LIMIT];
     char difficulty, speed;
 } GameSpace;
@@ -51,11 +52,15 @@ char KeyboardToKeycode(int key, KeycodeBindings bindings);
 
 int HitWindow(int difficulty, int hit);
 int HitScorePoints(char score);
+double HitAccuracy(char score);
 
 bool NotePressed(Note note, int input, KeycodeBindings bindings);
 char NoteHitScore(Note note, int hit_time, char difficulty, int offset);
 char NoteHoldScore(Note note, int release, char difficulty);
 
+GameSpace GameInit(void);
+void GameAddAccuracy(GameSpace* game, double acc);
+double GameGetAccuracy(GameSpace* game);
 bool GameAddNote(GameSpace* game, Note note);
 bool GameMakeNote(GameSpace* game, int time, char key, char color, bool mine);
 bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, char color, bool mine);
