@@ -6,7 +6,7 @@
 #define SCREEN_SIZE (Vector2){640, 480}
 
 typedef enum GameScene {LOGO, MENU, GAME, EDITOR} GameScene;
-typedef enum EditorMode {MAIN, INSERT_NORMAL, INSERT_HOLD, INSERT_MINE} EditorMode;
+typedef enum EditorMode {MAIN, INSERT_NORMAL, INSERT_HOLD, INSERT_MINE, EDIT_NOTE} EditorMode;
 
 
 int main(void)
@@ -46,6 +46,7 @@ int main(void)
             }
             break;
         case EDITOR:
+	    // TraceLog(LOG_INFO, "k:\t ");
             int input = GetKeyboardInput();
             if(mode == INSERT_NORMAL || mode == INSERT_MINE)
             {
@@ -81,6 +82,13 @@ int main(void)
                     hold_note.active = false;
                 }
             }
+	    if(mode == EDIT_NOTE)
+	    {
+                if(input)
+		{
+                    editor.current->note.key = KeyboardToKeycode(input, bindings);
+		}
+	    }
             if(mode == MAIN)
             {
                 if(IsKeyPressed(KEY_ENTER))
@@ -92,12 +100,14 @@ int main(void)
                 }
                 if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
                 {
+		    TraceLog(LOG_INFO, "ctrl+s:\t Save Chart");
                     Chart* temp_chart = EditorToChart(&editor);
                     SaveChart(temp_chart, "test.chart");
                     free(temp_chart);
                 }
                 if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_L))
                 {
+		    TraceLog(LOG_INFO, "ctrl+l:\t Load Chart");
                     ChartLoadResult result = LoadChart("test.chart");
                     if(result.success)
                     {
@@ -108,57 +118,79 @@ int main(void)
                 }
                 if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_O))
                 {
+                    TraceLog(LOG_INFO, "ctrl+o:\t Clear Chart");
                     EditorClearNotes(&editor);
                 }
                 if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_P))
                 {
+                    TraceLog(LOG_INFO, "ctrl+p:\t Print Editor Notes");
                     PrintEditor(&editor);
                 }
                 if(IsKeyPressed(KEY_N))
                 {
+                    TraceLog(LOG_INFO, "n:\t Mode INSERT NORMAL");
                     mode = INSERT_NORMAL;
-                    TraceLog(LOG_INFO, "INSERT NORMAL");
                 }
                 if(IsKeyPressed(KEY_H))
                 {
+                    TraceLog(LOG_INFO, "h:\t Mode INSERT HOLD");
                     mode = INSERT_HOLD;
-                    TraceLog(LOG_INFO, "INSERT HOLD");
                 }
                 if(IsKeyPressed(KEY_M))
                 {
+                    TraceLog(LOG_INFO, "m:\t Mode INSERT MINE");
                     mode = INSERT_MINE;
-                    TraceLog(LOG_INFO, "INSERT MINE");
                 }
+		if(IsKeyPressed(KEY_E))
+		{
+		    TraceLog(LOG_INFO, "e:\t Mode EDIT NOTE");
+		    mode = EDIT_NOTE;
+		}
             }
             // GENERIC EDITOR
             if(IsKeyPressed(KEY_BACKSPACE))
             {
                 EditorRemoveNote(&editor);
+		if(mode == EDIT_NOTE)
+		{
+		    TraceLog(LOG_INFO, "Exited EDIT NOTE to MAIN");
+		    mode = MAIN;
+		}
             }
             if(IsKeyPressed(KEY_ONE))
             {
+		TraceLog(LOG_INFO, "1:\t Color 0");
                 current_color = 0;
+		if(mode == EDIT_NOTE) editor.current->note.color = current_color;
             }
             if(IsKeyPressed(KEY_TWO))
             {
+		TraceLog(LOG_INFO, "2:\t Color 1");
                 current_color = 1;
+		if(mode == EDIT_NOTE) editor.current->note.color = current_color;
             }
             if(IsKeyPressed(KEY_THREE))
             {
+		TraceLog(LOG_INFO, "3:\t Color 2");
                 current_color = 2;
+		if(mode == EDIT_NOTE) editor.current->note.color = current_color;
             }
             if(IsKeyPressed(KEY_FOUR))
             {
+		TraceLog(LOG_INFO, "4:\t Color 3");
                 current_color = 3;
+		if(mode == EDIT_NOTE) editor.current->note.color = current_color;
             }
-            if(IsKeyDown(KEY_LEFT_CONTROL))
+            if(IsKeyDown(KEY_LEFT_CONTROL) && mode != EDIT_NOTE)
             {
                 if(IsKeyPressed(KEY_LEFT))
                 {
+		    TraceLog(LOG_INFO, "ctrl+left:\t First Note / Start");
                     EditorMoveToStart(&editor);
                 }
                 if(IsKeyPressed(KEY_RIGHT))
                 {
+		    TraceLog(LOG_INFO, "ctrl+right:\t Last Note / End");
                     EditorMoveToEnd(&editor);
                 }
             }
@@ -173,14 +205,28 @@ int main(void)
                 {
                     speed *= 4;
                 }
-                if(IsKeyDown(KEY_LEFT))
-                {
-                    EditorMoveTimed(&editor, -speed);
-                }
-                if(IsKeyDown(KEY_RIGHT))
-                {
-                    EditorMoveTimed(&editor, speed);
-                }
+		if(mode == EDIT_NOTE)
+		{
+		    if(IsKeyDown(KEY_LEFT) && EditorTiming(&editor, false))
+		    {
+			EditorMoveCurrentNote(&editor, -speed);
+		    }
+		    if(IsKeyDown(KEY_RIGHT) && EditorTiming(&editor, false))
+		    {
+			EditorMoveCurrentNote(&editor, speed);
+		    }
+		}
+		else
+		{
+		    if(IsKeyDown(KEY_LEFT))
+		    {
+			EditorMoveTimed(&editor, -speed);
+		    }
+		    if(IsKeyDown(KEY_RIGHT))
+		    {
+			EditorMoveTimed(&editor, speed);
+		    }
+		}
             }
             if(IsKeyDown(KEY_UP) && EditorTiming(&editor, false))
             {
@@ -196,8 +242,8 @@ int main(void)
             }
             if(IsKeyPressed(KEY_ESCAPE))
             {
+		TraceLog(LOG_INFO, "esc:\t Mode MAIN");
                 mode = MAIN;
-                TraceLog(LOG_INFO, "MAIN");
             }
             break;
         }
@@ -234,6 +280,10 @@ int main(void)
                 {
                     DrawText("INSERT MINE", 144, 32, 24, BLACK);
                 }
+		if(mode == EDIT_NOTE)
+		{
+                    DrawText("EDIT NOTE", 144, 32, 24, BLACK);
+		}
                 break;
         }
 

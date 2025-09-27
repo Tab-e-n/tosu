@@ -18,8 +18,8 @@
 
 # WHEN LOADING LEVEL
 `ChangeDirectory()` to the levels dir
-Custom assets can get loaded with static paths this way.
-When done, go back up
+Asset overrides can get loaded with static paths this way.
+When done, go back to Application Directory (`GetApplicationDirectory()`)
 
 # OTHER
 Notes - Decide how they should look
@@ -27,5 +27,7 @@ Editing placed notes
 Playing songs
 Note hit sound
 Ranks
-Accuracy
+
+# POTENCIAL
+Better way to measure accuracy?
 

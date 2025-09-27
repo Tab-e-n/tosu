@@ -378,6 +378,56 @@ bool EditorClearNotes(EditorChart* editor)
     return OK;
 }
 
+bool EditorMoveCurrentNote(EditorChart* editor, int time)
+{
+    EditorNote* current = editor->current;
+    current->note.time += time;
+    if(current->note.hold)
+    {
+	current->note.time_end += time;
+    }
+    EditorNote* previous = current->previous;
+    if(previous != (void*)0)
+    {
+	if(current->note.time < previous->note.time)
+	{
+	    current->previous = previous->previous;
+	    previous->previous = current;
+	    previous->next = current->next;
+	    current->next = previous;
+	    if(current->previous == (void*)0)
+	    {
+		editor->start = current;
+	    }
+	    if(previous->next == (void*)0)
+	    {
+		editor->end = previous;
+	    }
+	}
+    }
+    EditorNote* next = current->next;
+    if(next != (void*)0)
+    {
+	if(current->note.time > next->note.time)
+	{
+	    current->next = next->next;
+	    next->next = current;
+	    next->previous = current->previous;
+	    current->previous = next;
+	    if(current->next == (void*)0)
+	    {
+		editor->end = current;
+	    }
+	    if(next->previous == (void*)0)
+	    {
+		editor->start = next;
+	    }
+	}
+    }
+    editor->current_time = current->note.time;
+    return OK;
+}
+
 Chart* EditorToChart(EditorChart* editor)
 {
     TraceLog(LOG_INFO, "Converting EditorChart to Chart");
