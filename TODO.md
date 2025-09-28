@@ -19,11 +19,11 @@
 # WHEN LOADING LEVEL
 `ChangeDirectory()` to the levels dir
 Asset overrides can get loaded with static paths this way.
-When done, go back to Application Directory (`GetApplicationDirectory()`)
+When done, go back to Application Directory (`GetApplicationDirectory() or ".."`)
 
 # OTHER
 Notes - Decide how they should look
-Editing placed notes
+Editing duration of hold notes
 Playing songs
 Note hit sound
 Ranks
