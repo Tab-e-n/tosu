@@ -28,8 +28,8 @@
      borderlayer="true"
      shape-rendering="auto"
      inkscape:zoom="1.5091049"
-     inkscape:cx="358.49064"
-     inkscape:cy="240.53993"
+     inkscape:cx="354.18346"
+     inkscape:cy="240.53994"
      inkscape:window-width="1920"
      inkscape:window-height="1027"
      inkscape:window-x="-8"
@@ -61,7 +61,7 @@
      inkscape:label="Normal"
      transform="translate(-33.136364,-19.11039)">
     <rect
-       style="fill:#c8b7b7;stroke-width:0.236235"
+       style="fill:#e3dbdb;stroke-width:0.236235"
        id="rect7487"
        width="34.092648"
        height="34.092648"
@@ -69,7 +69,7 @@
        y="23.554922"
        ry="2.2315187" />
     <rect
-       style="fill:#916f6f;stroke-width:0.209605"
+       style="fill:#6c5353;stroke-width:0.209605"
        id="rect11153"
        width="30.249477"
        height="30.249477"
@@ -94,7 +94,7 @@
      inkscape:label="Hold"
      transform="translate(-31.032468,-18.584416)">
     <circle
-       style="fill:#c8b7b7;stroke-width:0.261174"
+       style="fill:#e3dbdb;stroke-width:0.261174"
        id="path11259"
        cy="40.853592"
        cx="94.412933"
@@ -123,7 +123,7 @@
      inkscape:label="Mine"
      transform="translate(-32.25974,-19.285714)">
     <rect
-       style="fill:#6c5353;stroke-width:0.236235"
+       style="fill:#916f6f;stroke-width:0.236235"
        id="rect11294"
        width="34.092648"
        height="34.092648"
