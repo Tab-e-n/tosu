@@ -23,7 +23,7 @@ When done, go back to Application Directory (`GetApplicationDirectory() or ".."`
 
 # OTHER
 Notes - Decide how they should look
-Editing duration of hold notes
+Play song in editor to compare if chart syncs up
 Playing songs
 Note hit sound
 Ranks

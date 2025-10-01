@@ -27,6 +27,7 @@ int main(void)
     EditorMode mode = MAIN;
     Note hold_note = (Note){0};
     char current_color = 0;
+    bool edit_duration = false;
 
     while(!WindowShouldClose())
     {
@@ -87,6 +88,18 @@ int main(void)
                 if(input)
 		{
                     editor.current->note.key = KeyboardToKeycode(input, bindings);
+		}
+		if(IsKeyPressed(KEY_TAB))
+		{
+		    edit_duration = !edit_duration;
+		    if(edit_duration)
+		    {
+			TraceLog(LOG_INFO, "tab:\t Edit Hold Duration");
+		    }
+		    else
+		    {
+			TraceLog(LOG_INFO, "tab:\t Edit Note Time");
+		    }
 		}
 	    }
             if(mode == MAIN)
@@ -151,11 +164,13 @@ int main(void)
             if(IsKeyPressed(KEY_BACKSPACE))
             {
                 EditorRemoveNote(&editor);
+		/*
 		if(mode == EDIT_NOTE)
 		{
 		    TraceLog(LOG_INFO, "Exited EDIT NOTE to MAIN");
 		    mode = MAIN;
 		}
+		*/
             }
             if(IsKeyPressed(KEY_ONE))
             {
@@ -205,7 +220,25 @@ int main(void)
                 {
                     speed *= 4;
                 }
-		if(mode == EDIT_NOTE)
+		if(mode == EDIT_NOTE && edit_duration)
+		{
+		    if(editor.current != (void*)0 && editor.current->note.hold)
+		    {
+			if(IsKeyDown(KEY_LEFT) && EditorTiming(&editor, false))
+			{
+			    editor.current->note.time_end -= speed;
+			    if(editor.current->note.time_end < 0)
+			    {
+				editor.current->note.time_end = 0;
+			    }
+			}
+			if(IsKeyDown(KEY_RIGHT) && EditorTiming(&editor, false))
+			{
+			    editor.current->note.time_end += speed;
+			}
+		    }
+		}
+		else if(mode == EDIT_NOTE)
 		{
 		    if(IsKeyDown(KEY_LEFT) && EditorTiming(&editor, false))
 		    {
@@ -267,6 +300,10 @@ int main(void)
                     DebugDrawNoteOutline(hold_note, BLUE);
                     DrawText(TextFormat("(%i)", hold_note.time), 96, 64, 24, BLUE);
                 }
+		if(edit_duration && editor.current!= (void*)0)
+		{
+                    DrawText(TextFormat("(%i)", editor.current->note.time_end), 96, 64, 24, BLUE);
+		}
                 DebugDrawEditor(&editor);
                 if(mode == INSERT_NORMAL)
                 {
