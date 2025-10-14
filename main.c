@@ -26,7 +26,7 @@ int main(void)
     EditorChart editor = (EditorChart){0};
     EditorMode mode = MAIN;
     Note hold_note = (Note){0};
-    char current_color = 0;
+    char current_color = 1;
     bool edit_duration = false;
 
     while(!WindowShouldClose())
@@ -57,11 +57,15 @@ int main(void)
                     note.active = true;
                     note.time = editor.current_time;
                     note.key = KeyboardToKeycode(input, bindings);
-                    note.color = current_color;
                     if(mode == INSERT_MINE)
                     {
                         note.mine = true;
+			note.color = 0;
                     }
+		    else
+		    {
+			note.color = current_color;
+		    }
                     EditorAddNote(&editor, note);
                 }
             }
@@ -85,7 +89,7 @@ int main(void)
             }
 	    if(mode == EDIT_NOTE)
 	    {
-                if(input)
+                if(editor.current != (void*)0 && input)
 		{
                     editor.current->note.key = KeyboardToKeycode(input, bindings);
 		}
@@ -172,29 +176,24 @@ int main(void)
 		}
 		*/
             }
+	    // current_color = 0 is reserved for mines
             if(IsKeyPressed(KEY_ONE))
             {
-		TraceLog(LOG_INFO, "1:\t Color 0");
-                current_color = 0;
-		if(mode == EDIT_NOTE) editor.current->note.color = current_color;
+		TraceLog(LOG_INFO, "1:\t Color 1");
+                current_color = 1;
+		if(mode == EDIT_NOTE) EditorColorCurrentNote(&editor, current_color);
             }
             if(IsKeyPressed(KEY_TWO))
             {
-		TraceLog(LOG_INFO, "2:\t Color 1");
-                current_color = 1;
-		if(mode == EDIT_NOTE) editor.current->note.color = current_color;
+		TraceLog(LOG_INFO, "2:\t Color 2");
+                current_color = 2;
+		if(mode == EDIT_NOTE) EditorColorCurrentNote(&editor, current_color);
             }
             if(IsKeyPressed(KEY_THREE))
             {
-		TraceLog(LOG_INFO, "3:\t Color 2");
-                current_color = 2;
-		if(mode == EDIT_NOTE) editor.current->note.color = current_color;
-            }
-            if(IsKeyPressed(KEY_FOUR))
-            {
-		TraceLog(LOG_INFO, "4:\t Color 3");
+		TraceLog(LOG_INFO, "3:\t Color 3");
                 current_color = 3;
-		if(mode == EDIT_NOTE) editor.current->note.color = current_color;
+		if(mode == EDIT_NOTE) EditorColorCurrentNote(&editor, current_color);
             }
             if(IsKeyDown(KEY_LEFT_CONTROL) && mode != EDIT_NOTE)
             {
@@ -300,7 +299,7 @@ int main(void)
                     DebugDrawNoteOutline(hold_note, BLUE);
                     DrawText(TextFormat("(%i)", hold_note.time), 96, 64, 24, BLUE);
                 }
-		if(edit_duration && editor.current!= (void*)0)
+		if(edit_duration && editor.current != (void*)0)
 		{
                     DrawText(TextFormat("(%i)", editor.current->note.time_end), 96, 64, 24, BLUE);
 		}

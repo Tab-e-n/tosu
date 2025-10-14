@@ -79,7 +79,9 @@ bool EditorMoveTimed(EditorChart* editor, int time);
 bool EditorAddNote(EditorChart* editor, Note note);
 bool EditorRemoveNote(EditorChart* editor);
 bool EditorClearNotes(EditorChart* editor);
+
 bool EditorMoveCurrentNote(EditorChart* editor, int time);
+bool EditorColorCurrentNote(EditorChart* editor, char color);
 
 Chart* EditorToChart(EditorChart* editor);
 bool ChartToEditor(Chart* chart, EditorChart* editor);

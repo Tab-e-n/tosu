@@ -381,6 +381,10 @@ bool EditorClearNotes(EditorChart* editor)
 bool EditorMoveCurrentNote(EditorChart* editor, int time)
 {
     EditorNote* current = editor->current;
+    if(current == (void*)0)
+    {
+	return FAIL;
+    }
     current->note.time += time;
     if(current->note.hold)
     {
@@ -426,6 +430,16 @@ bool EditorMoveCurrentNote(EditorChart* editor, int time)
     }
     editor->current_time = current->note.time;
     return OK;
+}
+
+bool EditorColorCurrentNote(EditorChart* editor, char color)
+{
+    if(editor->current != (void*)0)
+    {
+	editor->current->note.color = color;
+	return OK;
+    }
+    return FAIL;
 }
 
 Chart* EditorToChart(EditorChart* editor)
