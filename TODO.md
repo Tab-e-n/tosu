@@ -1,3 +1,13 @@
+# OVERALL STRUCTURE
+
+```
+tosu.exe
+textures/
+sounds/
+level/
+  [level_name]
+```
+
 # LEVEL FOLDER
 ```
 [Level]/
