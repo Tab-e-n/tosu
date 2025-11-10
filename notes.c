@@ -74,14 +74,14 @@ int HitScorePoints(char score)
     {
         case HIT_OK_LATE:
         case HIT_OK_EARLY:
-            return 100;
+            return SCORE_POINTS_OK;
         case HIT_GOOD_LATE:
         case HIT_GOOD_EARLY:
-            return 300;
+            return SCORE_POINTS_GOOD;
         case HIT_PERFECT:
-            return 500;
+            return SCORE_POINTS_PERFECT;
         case HIT_PENALTY:
-            return -200;
+            return SCORE_POINTS_PENALTY;
         default:
             return 0;
     }
