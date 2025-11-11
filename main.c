@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include "notes.h"
 #include "chart.h"
+#include "visuals.h"
 
 
 #define SCREEN_SIZE (Vector2){640, 480}

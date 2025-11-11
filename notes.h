@@ -25,6 +25,7 @@
 #define NOTE_LIMIT 128
 
 
+// Likely TODO: KeycodeBindings becomes a part of a bigger struct containing all options
 typedef struct KeycodeBindings {
     int codes[KEY_AMOUNT];
 } KeycodeBindings;
@@ -36,6 +37,7 @@ typedef struct Note {
          being_held;
     int time, time_end;
     char key, color;
+    // TODO: Store info on what hit score the player got show you can draw particles
 } Note;
 
 typedef struct GameSpace {
