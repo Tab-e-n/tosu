@@ -22,15 +22,13 @@ typedef struct RankSprites {
 } RankSprites;
 
 
-// Use these functions to load gameplay textures
-GameplaySprites LoadGameLevelSprites(void);
-GameplaySprites LoadGameSkinSprites(void);
-GameplaySprites LoadGameDefaultSprites(void);
+// Load sprites from the current_directory/sprites/
+GameplaySprites LoadGameSprites(void);
 // Have a separate place where you combine them
 GameplaySprites AddGameSprites(GameplaySprites source, GameplaySprites additional);
 // Once you are done using them (Player finished level), Discard the separate place and unload level sprites
 // Level and skin get unloaded when the game is closed
-void UnloadGameplaySprites(GameplaySprites sprites);
+void UnloadGameplaySprites(GameplaySprites* sprites);
 
 // Drawing in the editor may need to be done using a dummy GameSpace
 void DrawNormalNote(Note note, GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites);
