@@ -11,7 +11,7 @@
 typedef struct GameplaySprites {
     Texture normal_base, normal_outline, normal_hit_circle;
     Texture hold_base, hold_outline, hold_hit_circle;
-    Texture mine_base, mine_outline, mine_hit_circle;
+    Texture mine_base, mine_outline;
     Texture keys[KEY_AMOUNT];
     Texture score_100, score_300, score_500, score_miss, score_penalty;
 } GameplaySprites;
@@ -25,15 +25,13 @@ typedef struct RankSprites {
 // Load sprites from the current_directory/sprites/
 GameplaySprites LoadGameSprites(void);
 // Have a separate place where you combine them
-GameplaySprites AddGameSprites(GameplaySprites source, GameplaySprites additional);
+Texture AddSprite(Texture source, Texture add);
+void AddGameSprites(GameplaySprites* source, GameplaySprites add);
 // Once you are done using them (Player finished level), Discard the separate place and unload level sprites
 // Level and skin get unloaded when the game is closed
 void UnloadGameplaySprites(GameplaySprites* sprites);
 
 // Drawing in the editor may need to be done using a dummy GameSpace
-void DrawNormalNote(Note note, GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites);
-void DrawHoldNote(Note note, GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites);
-void DrawMineNote(Note note, GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites);
 void DrawNote(Note note, GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites);
 void GameDrawNotes(GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites);
 

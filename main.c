@@ -12,6 +12,7 @@ typedef enum EditorMode {MAIN, INSERT_NORMAL, INSERT_HOLD, INSERT_MINE, EDIT_NOT
 
 int main(void)
 {
+    ChangeDirectory(GetApplicationDirectory());
     InitWindow(SCREEN_SIZE.x, SCREEN_SIZE.y, "TOSU");
 
     SetTargetFPS(120);
@@ -29,6 +30,9 @@ int main(void)
     Note hold_note = (Note){0};
     char current_color = 1;
     bool edit_duration = false;
+
+    ChangeDirectory("resources");
+    GameplaySprites game_sprites = LoadGameSprites();
 
     while(!WindowShouldClose())
     {
@@ -290,7 +294,8 @@ int main(void)
             case GAME:
                 bg = (Color){232, 255, 232, 255};
                 ClearBackground(bg);
-                DebugDrawGame(&game);
+                // DebugDrawGame(&game);
+                GameDrawNotes(&game, bindings, game_sprites);
                 break;
             case EDITOR:
                 bg = (Color){248, 224, 255, 255};
@@ -328,6 +333,8 @@ int main(void)
 
         EndDrawing();
     }
+
+    UnloadGameplaySprites(&game_sprites);
 
     CloseWindow();
 

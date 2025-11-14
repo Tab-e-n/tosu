@@ -31,8 +31,11 @@ level/
 Asset overrides can get loaded with static paths this way.
 When done, go back to Application Directory (`GetApplicationDirectory() or ".."`)
 
+# PARTIALLY IMPLEMENTED
+Key rebinds
+
 # OTHER
-Notes - Decide how they should look
+Window size options / Full screen
 Play song in editor to compare if chart syncs up
 Playing songs
 Note hit sound
