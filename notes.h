@@ -2,11 +2,8 @@
 #define TOSU_NOTES
 
 #include <raylib.h>
+#include "options.h"
 
-
-#define KEY_AMOUNT 26
-#define FIRST_KEY_ROW 10
-#define SECOND_KEY_ROW 19
 
 #define HIT_MISS       0b0000
 #define HIT_PERFECT    0b0001
@@ -26,11 +23,6 @@
 
 #define NOTE_LIMIT 128
 
-
-// Likely TODO: KeycodeBindings becomes a part of a bigger struct containing all options
-typedef struct KeycodeBindings {
-    int codes[KEY_AMOUNT];
-} KeycodeBindings;
 
 typedef struct Note {
     bool active,
@@ -53,13 +45,6 @@ typedef struct GameSpace {
 } GameSpace;
 
 
-KeycodeBindings DefaultBindings();
-
-int GetKeyboardInput();
-int GetKeyboardInputRelease();
-int KeycodeToKeyboard(char code, KeycodeBindings bindings);
-char KeyboardToKeycode(int key, KeycodeBindings bindings);
-
 int HitWindow(int difficulty, int hit);
 int HitScorePoints(char score);
 double HitAccuracy(char score);
@@ -74,7 +59,7 @@ double GameGetAccuracy(GameSpace* game);
 bool GameAddNote(GameSpace* game, Note note);
 bool GameMakeNote(GameSpace* game, int time, char key, char color, bool mine);
 bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, char color, bool mine);
-void GameProcessNotes(GameSpace* game, KeycodeBindings bindings);
+void GameProcessNotes(GameSpace* game, Options* options);
 
 void DebugDrawNote(Note note, int time);
 void DebugDrawNoteOutline(Note note, Color color);

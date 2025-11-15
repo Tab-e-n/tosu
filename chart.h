@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <raylib.h>
+#include "options.h"
 #include "notes.h"
 
 

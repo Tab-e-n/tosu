@@ -41,6 +41,7 @@ Playing songs
 Note hit sound
 Ranks
 Customizing Note Colors
+Loading / Saving options
 
 # POTENCIAL
 Better way to measure accuracy?

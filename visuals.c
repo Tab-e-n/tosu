@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include "options.h"
 #include "notes.h"
 #include "visuals.h"
 
@@ -91,7 +92,7 @@ void UnloadGameplaySprites(GameplaySprites* sprites)
     }
 }
 
-void DrawNote(Note note, GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites)
+void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites sprites)
 {
     const int SPACING = 88;
     const int ROW_2_OFFSET = 20;
@@ -157,11 +158,11 @@ void DrawNote(Note note, GameSpace* game, KeycodeBindings bindings, GameplaySpri
     // DrawTexture(texture, x, y, tint);
 }
 
-void GameDrawNotes(GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites)
+void GameDrawNotes(GameSpace* game, Options* options, GameplaySprites sprites)
 {
     for(int i = 0; i < NOTE_LIMIT; i++)
     {
         Note note = game->notes[i];
-        DrawNote(note, game, bindings, sprites);
+        DrawNote(note, game, options, sprites);
     }
 }

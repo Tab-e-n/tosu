@@ -1,67 +1,6 @@
 #include <raylib.h>
+#include "options.h"
 #include "notes.h"
-
-
-KeycodeBindings DefaultBindings()
-{
-    KeycodeBindings bindings = (KeycodeBindings){0};
-
-    for(int i = 0; i < KEY_AMOUNT; i++)
-    {
-        bindings.codes[i] = 1 << i;
-    }
-
-    return bindings;
-}
-
-const int KEYBOARD[KEY_AMOUNT] = {
-    KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P,
-    KEY_A, KEY_S, KEY_D, KEY_F, KEY_G, KEY_H, KEY_J, KEY_K, KEY_L,
-    KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N, KEY_M,
-};
-
-int GetKeyboardInput()
-{
-    int input = 0;
-
-    for(int i = 0; i < KEY_AMOUNT; i++)
-    {
-        input += IsKeyPressed(KEYBOARD[i]) << i;
-    }
-
-    return input;
-}
-
-int GetKeyboardInputRelease()
-{
-    int input = 0;
-
-    for(int i = 0; i < KEY_AMOUNT; i++)
-    {
-        input += IsKeyReleased(KEYBOARD[i]) << i;
-    }
-
-    return input;
-}
-
-int KeycodeToKeyboard(char code, KeycodeBindings bindings)
-{
-    return bindings.codes[code];
-}
-
-char KeyboardToKeycode(int key, KeycodeBindings bindings)
-{
-    int code = 0;
-    while(bindings.codes[code] != key)
-    {
-        code++;
-        if(code >= KEY_AMOUNT)
-        {
-            return 0;
-        }
-    }
-    return code;
-}
 
 int HitWindow(int difficulty, int hit)
 {
@@ -259,7 +198,7 @@ bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, char color,
     return GameAddNote(game, note);
 }
 
-void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
+void GameProcessNotes(GameSpace* game, Options* options)
 {
     int input = GetKeyboardInput();
     int release = GetKeyboardInputRelease();
@@ -279,7 +218,7 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
 		GameAddAccuracy(game, HitAccuracy(HIT_PERFECT));
                 note.active = false;
             }
-            else if(NotePressed(note, release, bindings))
+            else if(NotePressed(note, release, options->bindings))
             {
                 char score = NoteHoldScore(note, game->time, game->difficulty);
                 if(score)
@@ -302,7 +241,7 @@ void GameProcessNotes(GameSpace* game, KeycodeBindings bindings)
                 TraceLog(LOG_INFO, "MISS: Didn't hit key");
                 note.active = false;
             }
-            if(NotePressed(note, input, bindings))
+            if(NotePressed(note, input, options->bindings))
             {
                 char score = NoteHitScore(note, game->time, game->difficulty, game->offset);
                 if(score)

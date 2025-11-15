@@ -2,10 +2,12 @@
 #define TOSU_VISUALS
 
 #include <raylib.h>
+#include "options.h"
 #include "notes.h"
 
 
-#define DEFAULT_WINDOW_SIZE (Vector2){960, 720} // 4:3 ratio
+#define FIRST_KEY_ROW 10
+#define SECOND_KEY_ROW 19
 
 // TODO: Non raylib default colors
 #define MINE_COLOR BLACK
@@ -36,8 +38,8 @@ void AddGameSprites(GameplaySprites* source, GameplaySprites add);
 void UnloadGameplaySprites(GameplaySprites* sprites);
 
 // Drawing in the editor may need to be done using a dummy GameSpace
-void DrawNote(Note note, GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites);
-void GameDrawNotes(GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites);
+void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites sprites);
+void GameDrawNotes(GameSpace* game, Options* options, GameplaySprites sprites);
 
 void DrawScore(GameSpace* game);
 void DrawTimebar(GameSpace* game);

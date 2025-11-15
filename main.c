@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include "options.h"
 #include "notes.h"
 #include "chart.h"
 #include "visuals.h"
@@ -20,7 +21,7 @@ int main(void)
 
     Chart* chart = (Chart*)0;
     GameSpace game = GameInit();
-    KeycodeBindings bindings = DefaultBindings();
+    Options options = DefaultOptions();
     char key = 0;
 
     EditorChart editor = (EditorChart){0};
@@ -41,7 +42,7 @@ int main(void)
             {
                 ChartReadNext(chart, &game);
             }
-            GameProcessNotes(&game, bindings);
+            GameProcessNotes(&game, &options);
             if(IsKeyPressed(KEY_ENTER))
             {
                 free(chart);
@@ -59,7 +60,7 @@ int main(void)
                     Note note = (Note){0};
                     note.active = true;
                     note.time = editor.current_time;
-                    note.key = KeyboardToKeycode(input, bindings);
+                    note.key = KeyboardToKeycode(input, options.bindings);
                     if(mode == INSERT_MINE)
                     {
                         note.mine = true;
@@ -79,7 +80,7 @@ int main(void)
                     hold_note = (Note){0};
                     hold_note.active = true;
                     hold_note.time = editor.current_time;
-                    hold_note.key = KeyboardToKeycode(input, bindings);
+                    hold_note.key = KeyboardToKeycode(input, options.bindings);
                     hold_note.color = current_color;
                     hold_note.hold = true;
                 }
@@ -94,7 +95,7 @@ int main(void)
 	    {
                 if(editor.current != (void*)0 && input)
 		{
-                    editor.current->note.key = KeyboardToKeycode(input, bindings);
+                    editor.current->note.key = KeyboardToKeycode(input, options.bindings);
 		}
 		if(IsKeyPressed(KEY_TAB))
 		{
@@ -294,7 +295,7 @@ int main(void)
                 bg = (Color){22, 15, 22, 255};
                 ClearBackground(bg);
                 // DebugDrawGame(&game);
-                GameDrawNotes(&game, bindings, game_sprites);
+                GameDrawNotes(&game, &options, game_sprites);
                 break;
             case EDITOR:
                 bg = (Color){248, 224, 255, 255};
