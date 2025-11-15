@@ -22,7 +22,7 @@ says for that platform. (Other than the last step this is pretty much copied fro
  - In the `build` folder type `./premake5 gmake` into the console
  - In the root folder type `make`
  - The exported build should be located in `bin`
- - Copy the `resources` folder next to the executable
+ - Copy the `resources` folder from `src` next to the executable
 
 And then you are done!
 
