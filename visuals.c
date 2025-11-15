@@ -120,10 +120,39 @@ void DrawNote(Note note, GameSpace* game, KeycodeBindings bindings, GameplaySpri
         position.x += (note.key - SECOND_KEY_ROW) * SPACING + ROW_3_OFFSET;
         position.y += 2 * SPACING;
     }
-    
-    DrawTextureEx(sprites.normal_base, position, 0.0, 0.25, WHITE);
-    DrawTextureEx(sprites.normal_outline, position, 0.0, 0.25, WHITE);
-    DrawTextureEx(sprites.keys[note.key], position, 0.0, 0.25, WHITE);
+
+    Color base_color = game->colors[note.color];
+    Color other_color = (note.mine ? MINE_COLOR : OUTLINE_COLOR);
+
+    int anim_time = note.time - game->time;
+
+    if(note.hold)
+    {
+        DrawTextureEx(sprites.hold_base, position, 0.0, 0.25, base_color);
+        DrawTextureEx(sprites.hold_outline, position, 0.0, 0.25, other_color);
+        DrawTextureEx(sprites.keys[note.key], position, 0.0, 0.25, other_color);
+    }
+    else if(note.mine)
+    {
+        DrawTextureEx(sprites.mine_base, position, 0.0, 0.25, other_color);
+        DrawTextureEx(sprites.mine_outline, position, 0.0, 0.25, base_color);
+        DrawTextureEx(sprites.keys[note.key], position, 0.0, 0.25, base_color);
+    }
+    else
+    {
+        DrawTextureEx(sprites.normal_base, position, 0.0, 0.25, base_color);
+        DrawTextureEx(sprites.normal_outline, position, 0.0, 0.25, other_color);
+        DrawTextureEx(sprites.keys[note.key], position, 0.0, 0.25, other_color);
+
+        // The way this is scaled won't work when the window size changes
+        // For now a temporary solution
+        int hit_time = anim_time < 0 ? 0 : anim_time;
+        float hit_circle_scale = 0.25 + hit_time * 0.001;
+        Vector2 hit_circle_position = position;
+        hit_circle_position.x -= hit_time * 0.16;
+        hit_circle_position.y -= hit_time * 0.16;
+        DrawTextureEx(sprites.normal_hit_circle, hit_circle_position, 0.0, hit_circle_scale, other_color);
+    }
 
     // DrawTexture(texture, x, y, tint);
 }

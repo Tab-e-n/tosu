@@ -7,6 +7,10 @@
 
 #define DEFAULT_WINDOW_SIZE (Vector2){960, 720} // 4:3 ratio
 
+// TODO: Non raylib default colors
+#define MINE_COLOR BLACK
+#define OUTLINE_COLOR WHITE
+
 
 typedef struct GameplaySprites {
     Texture normal_base, normal_outline, normal_hit_circle;

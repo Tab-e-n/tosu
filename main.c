@@ -279,6 +279,7 @@ int main(void)
             {
 		TraceLog(LOG_INFO, "esc:\t Mode MAIN");
                 mode = MAIN;
+                hold_note.active = false;
             }
             break;
         }

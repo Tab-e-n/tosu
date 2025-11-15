@@ -40,6 +40,7 @@ Play song in editor to compare if chart syncs up
 Playing songs
 Note hit sound
 Ranks
+Customizing Note Colors
 
 # POTENCIAL
 Better way to measure accuracy?

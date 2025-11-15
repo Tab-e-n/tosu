@@ -187,6 +187,10 @@ GameSpace GameInit(void)
 {
     GameSpace game = (GameSpace){0};
     //game.accuracy_mult = 1;
+    game.colors[0] = RED;
+    game.colors[1] = YELLOW;
+    game.colors[2] = GREEN;
+    game.colors[3] = SKYBLUE;
     return game;
 }
 

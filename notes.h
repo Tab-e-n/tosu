@@ -39,16 +39,17 @@ typedef struct Note {
          being_held;
     int time, time_end;
     char key, color;
-    // TODO: Store info on what hit score the player got show you can draw particles
+    // TODO: Store info on what hit score the player got so you can draw particles
 } Note;
 
 typedef struct GameSpace {
+    char difficulty, speed;
     int time, score, offset,
         current_note,
         current_code;
     double accuracy_sum, accuracy_mult;
+    Color colors[4]; // 0 is the color of mines, 1-3 color of notes
     Note notes[NOTE_LIMIT];
-    char difficulty, speed;
 } GameSpace;
 
 
