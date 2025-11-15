@@ -4,8 +4,6 @@
 #include "visuals.h"
 
 
-#define SCREEN_SIZE (Vector2){640, 480}
-
 typedef enum GameScene {LOGO, MENU, GAME, EDITOR} GameScene;
 typedef enum EditorMode {MAIN, INSERT_NORMAL, INSERT_HOLD, INSERT_MINE, EDIT_NOTE} EditorMode;
 
@@ -13,7 +11,7 @@ typedef enum EditorMode {MAIN, INSERT_NORMAL, INSERT_HOLD, INSERT_MINE, EDIT_NOT
 int main(void)
 {
     ChangeDirectory(GetApplicationDirectory());
-    InitWindow(SCREEN_SIZE.x, SCREEN_SIZE.y, "TOSU");
+    InitWindow(DEFAULT_WINDOW_SIZE.x, DEFAULT_WINDOW_SIZE.y, "TOSU");
 
     SetTargetFPS(120);
     SetExitKey(KEY_NULL);
@@ -292,7 +290,7 @@ int main(void)
         switch(scene)
         {
             case GAME:
-                bg = (Color){232, 255, 232, 255};
+                bg = (Color){22, 15, 22, 255};
                 ClearBackground(bg);
                 // DebugDrawGame(&game);
                 GameDrawNotes(&game, bindings, game_sprites);

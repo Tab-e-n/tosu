@@ -5,7 +5,7 @@
 #include "notes.h"
 
 
-// Use IsTextureValid() to check if texture is loaded
+#define DEFAULT_WINDOW_SIZE (Vector2){960, 720} // 4:3 ratio
 
 
 typedef struct GameplaySprites {

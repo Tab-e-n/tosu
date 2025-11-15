@@ -5,6 +5,8 @@
 
 
 #define KEY_AMOUNT 26
+#define FIRST_KEY_ROW 10
+#define SECOND_KEY_ROW 19
 
 #define HIT_MISS       0b0000
 #define HIT_PERFECT    0b0001

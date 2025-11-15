@@ -93,29 +93,37 @@ void UnloadGameplaySprites(GameplaySprites* sprites)
 
 void DrawNote(Note note, GameSpace* game, KeycodeBindings bindings, GameplaySprites sprites)
 {
+    const int SPACING = 88;
+    const int ROW_2_OFFSET = 20;
+    const int ROW_3_OFFSET = 60;
+    const Vector2 START_POS = (Vector2)
+    {
+        (DEFAULT_WINDOW_SIZE.x - SPACING * 10) * 0.5,
+        (DEFAULT_WINDOW_SIZE.y - SPACING * 3) * 0.5
+    };
     if(!note.active)
     {
         return;
     }
-    Vector2 position = (Vector2){32, 96};
-    if(note.key < 10)
+    Vector2 position = START_POS;
+    if(note.key < FIRST_KEY_ROW)
     {
-        position.x += note.key * 40;
+        position.x += note.key * SPACING;
     }
-    else if(note.key < 19)
+    else if(note.key < SECOND_KEY_ROW)
     {
-        position.x += (note.key - 10) * 40 + 10;
-        position.y += 40;
+        position.x += (note.key - FIRST_KEY_ROW) * SPACING + ROW_2_OFFSET;
+        position.y += SPACING;
     }
     else
     {
-        position.x += (note.key - 19) * 40 + 30;
-        position.y += 80;
+        position.x += (note.key - SECOND_KEY_ROW) * SPACING + ROW_3_OFFSET;
+        position.y += 2 * SPACING;
     }
     
-    DrawTextureV(sprites.normal_base, position, WHITE);
-    DrawTextureV(sprites.normal_outline, position, WHITE);
-    DrawTextureV(sprites.keys[note.key], position, WHITE);
+    DrawTextureEx(sprites.normal_base, position, 0.0, 0.25, WHITE);
+    DrawTextureEx(sprites.normal_outline, position, 0.0, 0.25, WHITE);
+    DrawTextureEx(sprites.keys[note.key], position, 0.0, 0.25, WHITE);
 
     // DrawTexture(texture, x, y, tint);
 }
