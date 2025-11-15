@@ -12,12 +12,19 @@ Not much game exists yet.
 
 ## EXPORTING
 
+The steps listed here are for exporting on Linux, on other platforms you will need to
+export it according to what [raylib-quickstart](https://github.com/raylib-extras/raylib-quickstart)
+says for that platform. (Other than the last step this is pretty much copied from there anyway)
+
  - Download [raylib-quickstart](https://github.com/raylib-extras/raylib-quickstart)
  - Clear the contents of the `src` folder
  - Clone this repository into the `src` folder
- - In the `build` folder type `./premake5 gmake`
+ - In the `build` folder type `./premake5 gmake` into the console
  - In the root folder type `make`
  - The exported build should be located in `bin`
+ - Copy the `resources` folder next to the executable
+
+And then you are done!
 
 ## HOW TO PLAY
 
