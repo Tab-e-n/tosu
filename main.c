@@ -12,6 +12,10 @@ typedef enum EditorMode {MAIN, INSERT_NORMAL, INSERT_HOLD, INSERT_MINE, EDIT_NOT
 int main(void)
 {
     ChangeDirectory(GetApplicationDirectory());
+    ChangeDirectory("resources");
+
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+
     InitWindow(DEFAULT_WINDOW_SIZE.x, DEFAULT_WINDOW_SIZE.y, "TOSU");
 
     SetTargetFPS(120);
@@ -30,11 +34,11 @@ int main(void)
     char current_color = 1;
     bool edit_duration = false;
 
-    ChangeDirectory("resources");
     GameplaySprites game_sprites = LoadGameSprites();
 
     while(!WindowShouldClose())
     {
+        UpdateWindowManager();
         switch(scene)
         {
         case GAME:

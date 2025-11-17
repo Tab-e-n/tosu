@@ -94,14 +94,22 @@ void UnloadGameplaySprites(GameplaySprites* sprites)
 
 void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites sprites)
 {
-    const int SPACING = 88;
-    const int ROW_2_OFFSET = 20;
-    const int ROW_3_OFFSET = 60;
+    // TODO: Clean up this code a tad
+    const Vector2 SCREEN_SIZE = ScreenSize();
+    const Vector2 SCREEN_SCALE = ScreenScale();
+    float scale = 1.0;
+    // TODO: Screen ratio check here, use either x or y
+    scale = SCREEN_SCALE.y * 0.25;
+    const int SPRITE_SIZE = 320;
+    const int SPACING = scale * (SPRITE_SIZE + 32);
+    const int ROW_2_OFFSET = scale * (SPRITE_SIZE >> 2);
+    const int ROW_3_OFFSET = ROW_2_OFFSET * 3;
     const Vector2 START_POS = (Vector2)
     {
-        (DEFAULT_WINDOW_SIZE.x - SPACING * 10) * 0.5,
-        (DEFAULT_WINDOW_SIZE.y - SPACING * 3) * 0.5
+        (SCREEN_SIZE.x - SPACING * 10) * 0.5,
+        (SCREEN_SIZE.y - SPACING * 3) * 0.5
     };
+
     if(!note.active)
     {
         return;
@@ -129,29 +137,29 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
 
     if(note.hold)
     {
-        DrawTextureEx(sprites.hold_base, position, 0.0, 0.25, base_color);
-        DrawTextureEx(sprites.hold_outline, position, 0.0, 0.25, other_color);
-        DrawTextureEx(sprites.keys[note.key], position, 0.0, 0.25, other_color);
+        DrawTextureEx(sprites.hold_base, position, 0.0, scale, base_color);
+        DrawTextureEx(sprites.hold_outline, position, 0.0, scale, other_color);
+        DrawTextureEx(sprites.keys[note.key], position, 0.0, scale, other_color);
     }
     else if(note.mine)
     {
-        DrawTextureEx(sprites.mine_base, position, 0.0, 0.25, other_color);
-        DrawTextureEx(sprites.mine_outline, position, 0.0, 0.25, base_color);
-        DrawTextureEx(sprites.keys[note.key], position, 0.0, 0.25, base_color);
+        DrawTextureEx(sprites.mine_base, position, 0.0, scale, other_color);
+        DrawTextureEx(sprites.mine_outline, position, 0.0, scale, base_color);
+        DrawTextureEx(sprites.keys[note.key], position, 0.0, scale, base_color);
     }
     else
     {
-        DrawTextureEx(sprites.normal_base, position, 0.0, 0.25, base_color);
-        DrawTextureEx(sprites.normal_outline, position, 0.0, 0.25, other_color);
-        DrawTextureEx(sprites.keys[note.key], position, 0.0, 0.25, other_color);
+        DrawTextureEx(sprites.normal_base, position, 0.0, scale, base_color);
+        DrawTextureEx(sprites.normal_outline, position, 0.0, scale, other_color);
+        DrawTextureEx(sprites.keys[note.key], position, 0.0, scale, other_color);
 
-        // The way this is scaled won't work when the window size changes
-        // For now a temporary solution
         int hit_time = anim_time < 0 ? 0 : anim_time;
-        float hit_circle_scale = 0.25 + hit_time * 0.001;
+        // TODO: Un-magic these numbers (0.004 and 0.002)
+        float hit_circle_scale = scale + hit_time * scale * 0.004;
         Vector2 hit_circle_position = position;
-        hit_circle_position.x -= hit_time * 0.16;
-        hit_circle_position.y -= hit_time * 0.16;
+        float offset = hit_time * scale * SPRITE_SIZE * 0.002;
+        hit_circle_position.x -= offset;
+        hit_circle_position.y -= offset;
         DrawTextureEx(sprites.normal_hit_circle, hit_circle_position, 0.0, hit_circle_scale, other_color);
     }
 
