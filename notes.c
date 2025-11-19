@@ -125,7 +125,6 @@ char NoteHoldScore(Note note, int release, char difficulty)
 GameSpace GameInit(void)
 {
     GameSpace game = (GameSpace){0};
-    //game.accuracy_mult = 1;
     game.colors[0] = RED;
     game.colors[1] = YELLOW;
     game.colors[2] = GREEN;
@@ -182,6 +181,7 @@ bool GameMakeNote(GameSpace* game, int time, char key, char color, bool mine)
     note.key = key;
     note.color = color;
     note.mine = mine;
+    note.score = HIT_NULL;
     return GameAddNote(game, note);
 }
 
@@ -195,6 +195,7 @@ bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, char color,
     note.key = key;
     note.color = color;
     note.mine = mine;
+    note.score = HIT_NULL;
     return GameAddNote(game, note);
 }
 
@@ -211,52 +212,63 @@ void GameProcessNotes(GameSpace* game, Options* options)
         }
         if(note.being_held)
         {
+            if(note.score != HIT_NULL)
+            {
+                if(note.time_end + NOTE_DESPAWN_WINDOW < game->time)
+                {
+                    note.active = false;
+                }
+                continue;
+            }
             if(note.time_end + HitWindow(game->difficulty, 3) < game->time)
             {
                 TraceLog(LOG_INFO, "SCORE: Held till end");
+                note.score = HIT_PERFECT;
                 game->score += HitScorePoints(HIT_PERFECT);
 		GameAddAccuracy(game, HitAccuracy(HIT_PERFECT));
-                note.active = false;
             }
             else if(NotePressed(note, release, options->bindings))
             {
-                char score = NoteHoldScore(note, game->time, game->difficulty);
-                if(score)
+                note.score = NoteHoldScore(note, game->time, game->difficulty);
+                if(note.score)
                 {
                     TraceLog(LOG_INFO, "SCORE: Ended hold early");
-                    game->score += HitScorePoints(score);
-		    GameAddAccuracy(game, HitAccuracy(score));
+                    game->score += HitScorePoints(note.score);
+		    GameAddAccuracy(game, HitAccuracy(note.score));
                 }
                 else
                 {
                     TraceLog(LOG_INFO, "MISS: ended hold too early");
                 }
-                note.active = false;
             }
         }
         else
         {
+            if(note.score != HIT_NULL)
+            {
+                if(note.time + NOTE_DESPAWN_WINDOW < game->time)
+                {
+                    note.active = false;
+                }
+                continue;
+            }
             if(note.time + HitWindow(game->difficulty, 3) < game->time)
             {
                 TraceLog(LOG_INFO, "MISS: Didn't hit key");
-                note.active = false;
+                note.score = HIT_MISS;
             }
             if(NotePressed(note, input, options->bindings))
             {
-                char score = NoteHitScore(note, game->time, game->difficulty, game->offset);
-                if(score)
+                note.score = NoteHitScore(note, game->time, game->difficulty, game->offset);
+                if(note.score)
                 {
                     TraceLog(LOG_INFO, "SCORE: Hit note");
-                    game->score += HitScorePoints(score);
-		    GameAddAccuracy(game, HitAccuracy(score));
+                    game->score += HitScorePoints(note.score);
+		    GameAddAccuracy(game, HitAccuracy(note.score));
 
                     if(note.hold)
                     {
                         note.being_held = true;
-                    }
-                    else
-                    {
-                        note.active = false;
                     }
                 }
                 else
@@ -266,7 +278,6 @@ void GameProcessNotes(GameSpace* game, Options* options)
             }
         }
         game->notes[i] = note;
-
     }
     game->time++;
 }

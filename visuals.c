@@ -98,8 +98,7 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
     const Vector2 SCREEN_SIZE = ScreenSize();
     const Vector2 SCREEN_SCALE = ScreenScale();
     float scale = 1.0;
-    // TODO: Screen ratio check here, use either x or y
-    scale = SCREEN_SCALE.y * 0.25;
+    scale = (SCREEN_SCALE.x > SCREEN_SCALE.y ? SCREEN_SCALE.y : SCREEN_SCALE.x) * 0.25;
     const int SPRITE_SIZE = 320;
     const int SPACING = scale * (SPRITE_SIZE + 32);
     const int ROW_2_OFFSET = scale * (SPRITE_SIZE >> 2);

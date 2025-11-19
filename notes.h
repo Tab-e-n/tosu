@@ -5,13 +5,14 @@
 #include "options.h"
 
 
-#define HIT_MISS       0b0000
-#define HIT_PERFECT    0b0001
-#define HIT_GOOD_LATE  0b1010
-#define HIT_GOOD_EARLY 0b0010
-#define HIT_OK_LATE    0b1100
-#define HIT_OK_EARLY   0b0100
-#define HIT_PENALTY    0b10000
+#define HIT_NULL       0b00000
+#define HIT_PERFECT    0b00001
+#define HIT_GOOD_EARLY 0b00010
+#define HIT_GOOD_LATE  0b01010
+#define HIT_OK_EARLY   0b00100
+#define HIT_OK_LATE    0b01100
+#define HIT_MISS       0b10000
+#define HIT_PENALTY    0b11000
 
 #define SCORE_POINTS_PENALTY -200
 #define SCORE_POINTS_OK      100
@@ -20,6 +21,7 @@
 
 #define BASE_HIT_WINDOW 14
 #define NOTE_SPAWN_WINDOW 120
+#define NOTE_DESPAWN_WINDOW 120
 
 #define NOTE_LIMIT 128
 
@@ -30,8 +32,7 @@ typedef struct Note {
          mine,
          being_held;
     int time, time_end;
-    char key, color;
-    // TODO: Store info on what hit score the player got so you can draw particles
+    char key, color, score;
 } Note;
 
 typedef struct GameSpace {
