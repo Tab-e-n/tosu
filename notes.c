@@ -214,10 +214,11 @@ void GameProcessNotes(GameSpace* game, Options* options)
         {
             if(note.score != HIT_NULL)
             {
-                if(note.time_end + NOTE_DESPAWN_WINDOW < game->time)
+                if(note.time_end + NOTE_DESPAWN_WINDOW <= game->time)
                 {
                     note.active = false;
                 }
+                game->notes[i] = note;
                 continue;
             }
             if(note.time_end + HitWindow(game->difficulty, 3) < game->time)
@@ -246,10 +247,11 @@ void GameProcessNotes(GameSpace* game, Options* options)
         {
             if(note.score != HIT_NULL)
             {
-                if(note.time + NOTE_DESPAWN_WINDOW < game->time)
+                if(note.time + NOTE_DESPAWN_WINDOW <= game->time)
                 {
                     note.active = false;
                 }
+                game->notes[i] = note;
                 continue;
             }
             if(note.time + HitWindow(game->difficulty, 3) < game->time)
@@ -260,7 +262,7 @@ void GameProcessNotes(GameSpace* game, Options* options)
             if(NotePressed(note, input, options->bindings))
             {
                 note.score = NoteHitScore(note, game->time, game->difficulty, game->offset);
-                if(note.score)
+                if(note.score != HIT_MISS)
                 {
                     TraceLog(LOG_INFO, "SCORE: Hit note");
                     game->score += HitScorePoints(note.score);
@@ -274,6 +276,7 @@ void GameProcessNotes(GameSpace* game, Options* options)
                 else
                 {
                     TraceLog(LOG_INFO, "Not yet in hit window");
+                    note.score = HIT_NULL;
                 }
             }
         }

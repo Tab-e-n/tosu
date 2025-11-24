@@ -133,6 +133,13 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
     Color other_color = (note.mine ? MINE_COLOR : OUTLINE_COLOR);
 
     int anim_time = note.time - game->time;
+    int alpha = anim_time * 255;
+    alpha = alpha < 0 ? -alpha : alpha;
+    alpha = NOTE_SPAWN_WINDOW - alpha;
+    alpha /= (NOTE_SPAWN_WINDOW);
+    alpha = alpha > 255 ? 255 : alpha;
+    base_color.a = alpha;
+    other_color.a = alpha;
 
     if(note.hold)
     {
@@ -153,16 +160,42 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
         DrawTextureEx(sprites.keys[note.key], position, 0.0, scale, other_color);
 
         int hit_time = anim_time < 0 ? 0 : anim_time;
-        // TODO: Un-magic these numbers (0.004 and 0.002)
-        float hit_circle_scale = scale + hit_time * scale * 0.004;
+        float hit_circle_scale = scale + hit_time * scale / NOTE_SPAWN_WINDOW;
         Vector2 hit_circle_position = position;
-        float offset = hit_time * scale * SPRITE_SIZE * 0.002;
+        float offset = hit_time * scale * SPRITE_SIZE / NOTE_SPAWN_WINDOW * 0.5;
         hit_circle_position.x -= offset;
         hit_circle_position.y -= offset;
         DrawTextureEx(sprites.normal_hit_circle, hit_circle_position, 0.0, hit_circle_scale, other_color);
     }
 
-    // DrawTexture(texture, x, y, tint);
+    if(note.score != HIT_NULL)
+    {
+        int score_time = anim_time > 0 ? 0 : anim_time;
+        Vector2 score_position = position;
+        score_position.y += SPRITE_SIZE;
+        Texture used_texture;
+        switch(note.score)
+        {
+            case(HIT_PERFECT):
+                used_texture = sprites.score_500;
+                break;
+            case(HIT_GOOD_EARLY):
+            case(HIT_GOOD_LATE):
+                used_texture = sprites.score_300;
+                break;
+            case(HIT_OK_EARLY):
+            case(HIT_OK_LATE):
+                used_texture = sprites.score_100;
+                break;
+            case(HIT_MISS):
+                used_texture = sprites.score_miss;
+                break;
+            case(HIT_PENALTY):
+                used_texture = sprites.score_penalty;
+                break;
+        }
+        DrawTextureEx(used_texture, position, 0.0, scale, WHITE);
+    }
 }
 
 void GameDrawNotes(GameSpace* game, Options* options, GameplaySprites sprites)

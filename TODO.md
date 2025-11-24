@@ -35,37 +35,11 @@ When done, go back to Application Directory (`GetApplicationDirectory() or ".."`
 Key rebinds
 
 # OTHER
-Window size options / Full screen
- - SetConfigFlags(FLAG_WINDOW_RESIZABLE);
- - GetScreenWidth()
- - GetScreenHeight()
- - Game will take up the same sized aspect ratio
- - Background is streched to fit screen (keep aspect just cutoff overflowing bits)
-
-+--------+
-|        |
-|  Game  |
-|        |
-+--------+
-
-+--+--------+--+
-|  |        |  |
-|  |  Game  |  |
-|  |        |  |
-+--+--------+--+
-
-+--------+
-+--------+
-|        |
-|  Game  |
-|        |
-+--------+
-+--------+
-
-Play song in editor to compare if chart syncs up
-Playing songs
-Note hit sound
+General system for scaling based on window size
 Ranks
+Note hit sound
+Playing songs
+Play song in editor to compare if chart syncs up
 Customizing Note Colors
 Loading / Saving options
 
