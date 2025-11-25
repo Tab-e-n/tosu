@@ -92,6 +92,38 @@ void UnloadGameplaySprites(GameplaySprites* sprites)
     }
 }
 
+int NoteAlpha(Note note, int game_time)
+{
+    int anim_time = note.time - game_time;
+    int alpha = 0;
+    //alpha = alpha < 0 ? -alpha : alpha;
+    if(anim_time >= 0)
+    {
+        alpha = anim_time;
+        alpha -= ALPHA_HOLD_FRAMES;
+        alpha = alpha < 0 ? 0 : alpha;
+        alpha *= 255;
+        alpha /= NOTE_SPAWN_WINDOW - ALPHA_HOLD_FRAMES;
+        alpha = 255 - alpha;
+    }
+    if(note.hold)
+    {
+        anim_time = note.time_end - game_time;
+    }
+    if(anim_time < 0)
+    {
+        alpha = anim_time;
+        alpha = -alpha;
+        alpha -= ALPHA_HOLD_FRAMES;
+        alpha = alpha < 0 ? 0 : alpha;
+        alpha = alpha > ALPHA_DISAPPEAR_FRAMES ? ALPHA_DISAPPEAR_FRAMES : alpha;
+        alpha *= 255;
+        alpha /= ALPHA_DISAPPEAR_FRAMES;
+        alpha = 255 - alpha;
+    }
+    return alpha;
+}
+
 void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites sprites)
 {
     // TODO: Clean up this code a tad
@@ -132,15 +164,11 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
     Color base_color = game->colors[note.color];
     Color other_color = (note.mine ? MINE_COLOR : OUTLINE_COLOR);
 
-    int anim_time = note.time - game->time;
-    int alpha = anim_time * 255;
-    alpha = alpha < 0 ? -alpha : alpha;
-    alpha = NOTE_SPAWN_WINDOW - alpha;
-    alpha /= (NOTE_SPAWN_WINDOW);
-    alpha = alpha > 255 ? 255 : alpha;
+    int alpha = NoteAlpha(note, game->time);
     base_color.a = alpha;
     other_color.a = alpha;
 
+    int anim_time = note.time - game->time;
     if(note.hold)
     {
         DrawTextureEx(sprites.hold_base, position, 0.0, scale, base_color);

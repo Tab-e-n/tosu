@@ -9,6 +9,9 @@
 #define FIRST_KEY_ROW 10
 #define SECOND_KEY_ROW 19
 
+#define ALPHA_HOLD_FRAMES 30
+#define ALPHA_DISAPPEAR_FRAMES 30
+
 // TODO: Non raylib default colors
 #define MINE_COLOR BLACK
 #define OUTLINE_COLOR WHITE
@@ -38,6 +41,7 @@ void AddGameSprites(GameplaySprites* source, GameplaySprites add);
 void UnloadGameplaySprites(GameplaySprites* sprites);
 
 // Drawing in the editor may need to be done using a dummy GameSpace
+int NoteAlpha(Note note, int game_time);
 void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites sprites);
 void GameDrawNotes(GameSpace* game, Options* options, GameplaySprites sprites);
 
