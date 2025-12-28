@@ -33,15 +33,24 @@ When done, go back to Application Directory (`GetApplicationDirectory() or ".."`
 
 # PARTIALLY IMPLEMENTED
 Key rebinds
-
-# OTHER
+Speed & difficulty
 General system for scaling based on window size
+
+# LIST
+Hold notes draw 2 hit circles
+Main Menu
+Selecting charts for play and editing
+Playtesting and regular play don't conflict
 Ranks
+Finish screen
+Saving scores
 Note hit sound
 Playing songs
-Play song in editor to compare if chart syncs up
-Customizing Note Colors
+Options menu
 Loading / Saving options
+Customizing Note Colors
+Play song in editor to compare if chart syncs up
+Logos on startup
 
 # POTENCIAL
 Better way to measure accuracy?

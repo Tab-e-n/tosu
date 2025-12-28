@@ -43,6 +43,7 @@ void UnloadGameplaySprites(GameplaySprites* sprites);
 // Drawing in the editor may need to be done using a dummy GameSpace
 int NoteAlpha(Note note, int game_time);
 void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites sprites);
+void DrawNoteScore(char score, Vector2 position, double scale, GameplaySprites sprites);
 void GameDrawNotes(GameSpace* game, Options* options, GameplaySprites sprites);
 
 void DrawScore(GameSpace* game);

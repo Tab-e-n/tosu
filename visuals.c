@@ -95,7 +95,7 @@ void UnloadGameplaySprites(GameplaySprites* sprites)
 int NoteAlpha(Note note, int game_time)
 {
     int anim_time = note.time - game_time;
-    int alpha = 0;
+    int alpha = 255;
     //alpha = alpha < 0 ? -alpha : alpha;
     if(anim_time >= 0)
     {
@@ -106,7 +106,7 @@ int NoteAlpha(Note note, int game_time)
         alpha /= NOTE_SPAWN_WINDOW - ALPHA_HOLD_FRAMES;
         alpha = 255 - alpha;
     }
-    if(note.hold)
+    if(note.hold && note.score != HIT_MISS)
     {
         anim_time = note.time_end - game_time;
     }
@@ -140,6 +140,7 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
         (SCREEN_SIZE.x - SPACING * 10) * 0.5,
         (SCREEN_SIZE.y - SPACING * 3) * 0.5
     };
+    const double INV_NOTE_SPAWN_WINDOW = 1.0 / NOTE_SPAWN_WINDOW;
 
     if(!note.active)
     {
@@ -169,11 +170,38 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
     other_color.a = alpha;
 
     int anim_time = note.time - game->time;
+
+    int hit_time = anim_time < 0 ? 0 : anim_time;
+    if(note.being_held)
+    {
+        if(note.score_end != HIT_NULL)
+        {
+            hit_time = 0;
+        }
+        else
+        {
+            hit_time = note.time_end - game->time;
+            hit_time = hit_time < 0 ? 0 : hit_time;
+        }
+    }
+    else if(note.score != HIT_NULL)
+    {
+        hit_time = 0;
+    }
+    double hit_circle_scale = scale + hit_time * scale * INV_NOTE_SPAWN_WINDOW;
+    double offset = hit_circle_scale * SPRITE_SIZE * 0.5;
+    double center = scale * SPRITE_SIZE * 0.5;
+    Vector2 hit_circle_position = position;
+    hit_circle_position.x += center - offset;
+    hit_circle_position.y += center - offset;
+
     if(note.hold)
     {
         DrawTextureEx(sprites.hold_base, position, 0.0, scale, base_color);
         DrawTextureEx(sprites.hold_outline, position, 0.0, scale, other_color);
         DrawTextureEx(sprites.keys[note.key], position, 0.0, scale, other_color);
+
+        DrawTextureEx(sprites.hold_hit_circle, hit_circle_position, 0.0, hit_circle_scale, other_color);
     }
     else if(note.mine)
     {
@@ -187,43 +215,51 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
         DrawTextureEx(sprites.normal_outline, position, 0.0, scale, other_color);
         DrawTextureEx(sprites.keys[note.key], position, 0.0, scale, other_color);
 
-        int hit_time = anim_time < 0 ? 0 : anim_time;
-        float hit_circle_scale = scale + hit_time * scale / NOTE_SPAWN_WINDOW;
-        Vector2 hit_circle_position = position;
-        float offset = hit_time * scale * SPRITE_SIZE / NOTE_SPAWN_WINDOW * 0.5;
-        hit_circle_position.x -= offset;
-        hit_circle_position.y -= offset;
         DrawTextureEx(sprites.normal_hit_circle, hit_circle_position, 0.0, hit_circle_scale, other_color);
     }
 
-    if(note.score != HIT_NULL)
+    if(note.hold)
     {
-        int score_time = anim_time > 0 ? 0 : anim_time;
-        Vector2 score_position = position;
-        score_position.y += SPRITE_SIZE;
-        Texture used_texture;
-        switch(note.score)
+        int score_time = anim_time > 0 ? 0 : -anim_time;
+        if(note.score_end != HIT_NULL)
         {
-            case(HIT_PERFECT):
-                used_texture = sprites.score_500;
-                break;
-            case(HIT_GOOD_EARLY):
-            case(HIT_GOOD_LATE):
-                used_texture = sprites.score_300;
-                break;
-            case(HIT_OK_EARLY):
-            case(HIT_OK_LATE):
-                used_texture = sprites.score_100;
-                break;
-            case(HIT_MISS):
-                used_texture = sprites.score_miss;
-                break;
-            case(HIT_PENALTY):
-                used_texture = sprites.score_penalty;
-                break;
+            DrawNoteScore(note.score_end, position, scale, sprites);
         }
-        DrawTextureEx(used_texture, position, 0.0, scale, WHITE);
+        else if(note.score != HIT_NULL && score_time < NOTE_DESPAWN_WINDOW)
+        {
+            DrawNoteScore(note.score, position, scale, sprites);
+        }
     }
+    else if(note.score != HIT_NULL && (!note.mine || note.score == HIT_PENALTY))
+    {
+        DrawNoteScore(note.score, position, scale, sprites);
+    }
+}
+
+void DrawNoteScore(char score, Vector2 position, double scale, GameplaySprites sprites)
+{
+    Texture used_texture;
+    switch(score)
+    {
+        case(HIT_PERFECT):
+            used_texture = sprites.score_500;
+            break;
+        case(HIT_GOOD_EARLY):
+        case(HIT_GOOD_LATE):
+            used_texture = sprites.score_300;
+            break;
+        case(HIT_OK_EARLY):
+        case(HIT_OK_LATE):
+            used_texture = sprites.score_100;
+            break;
+        case(HIT_MISS):
+            used_texture = sprites.score_miss;
+            break;
+        case(HIT_PENALTY):
+            used_texture = sprites.score_penalty;
+            break;
+    }
+    DrawTextureEx(used_texture, position, 0.0, scale, WHITE);
 }
 
 void GameDrawNotes(GameSpace* game, Options* options, GameplaySprites sprites)
@@ -234,3 +270,25 @@ void GameDrawNotes(GameSpace* game, Options* options, GameplaySprites sprites)
         DrawNote(note, game, options, sprites);
     }
 }
+
+void DrawScore(GameSpace* game)
+{
+    // UNIMPLEMENTED
+}
+
+void DrawTimebar(GameSpace* game)
+{
+    // UNIMPLEMENTED
+}
+
+RankSprites LoadRankSprites(void)
+{
+    // UNIMPLEMENTED
+    return (RankSprites){0};
+}
+
+void UnloadRankSprites(RankSprites sprites)
+{
+    // UNIMPLEMENTED
+}
+

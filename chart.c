@@ -172,24 +172,22 @@ bool EditorMoveToEnd(EditorChart* editor)
 
 bool EditorMoveToNext(EditorChart* editor)
 {
-    if(editor->current->next != (void*)0)
+    if(editor->current == (void*)0 || editor->current->next == (void*)0)
     {
-        editor->current = editor->current->next;
-        editor->current_time = editor->current->note.time;
-        return OK;
+        return FAIL;
     }
-    return FAIL;
+    //editor->current = editor->current->next;
+    //editor->current_time = editor->current->note.time;
+    return EditorMoveToTimecode(editor, editor->current->next->note.time);
 }
 
 bool EditorMoveToPrevious(EditorChart* editor)
 {
-    if(editor->current->previous != (void*)0)
+    if(editor->current == (void*)0 || editor->current->previous == (void*)0)
     {
-        editor->current = editor->current->previous;
-        editor->current_time = editor->current->note.time;
-        return OK;
+        return FAIL;
     }
-    return FAIL;
+    return EditorMoveToTimecode(editor, editor->current->previous->note.time);
 }
 
 bool EditorMove(EditorChart* editor, int time)
@@ -202,14 +200,14 @@ bool EditorMove(EditorChart* editor, int time)
     EditorNote* current = editor->current;
     if(time > 0 && current->next != (void*)0)
     {
-        while(current->next != (void*)0 && current->next->note.time < editor->current_time)
+        while(current->next != (void*)0 && current->next->note.time <= editor->current_time)
         {
             current = current->next;
         }
     }
     if(time < 0 && current->previous != (void*)0)
     {
-        while(current->previous != (void*)0 && current->previous->note.time > editor->current_time)
+        while(current->previous != (void*)0 && current->previous->note.time >= editor->current_time)
         {
             current = current->previous;
         }
@@ -504,7 +502,7 @@ bool ChartToEditor(Chart* chart, EditorChart* editor)
     }
     editor->difficulty = chart->difficulty;
     editor->speed = chart->speed;
-    editor->current_time = 0;
+    EditorMoveToStart(editor);
     return OK;
 }
 

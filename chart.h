@@ -7,14 +7,6 @@
 #include "notes.h"
 
 
-#define OK 0
-#define FAIL 1
-#define UNIMPLEMENTED 2
-#define ERROR 3
-#define ERROR_CHART_NOT_LOADED 4
-#define ERROR_GAMESPACE_NOT_LOADED 5
-// Should move these into a separate file
-
 #define MOVE_DELAY_FRAMES 15
 #define TIMECODE_SHIFT 10
 

@@ -32,7 +32,8 @@ typedef struct Note {
          mine,
          being_held;
     int time, time_end;
-    char key, color, score;
+    char key, color,
+         score, score_end;
 } Note;
 
 typedef struct GameSpace {

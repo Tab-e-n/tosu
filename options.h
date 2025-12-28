@@ -5,6 +5,13 @@
 #include <raylib.h>
 
 
+#define OK 0
+#define FAIL 1
+#define UNIMPLEMENTED 2
+#define ERROR 3
+#define ERROR_CHART_NOT_LOADED 4
+#define ERROR_GAMESPACE_NOT_LOADED 5
+
 #define DEFAULT_WINDOW_SIZE (Vector2){960, 720} // 4:3 ratio
 
 #define KEY_AMOUNT 26
