@@ -4,6 +4,25 @@
 #include "visuals.h"
 
 
+void DrawScreenInline(float width, Color color)
+{
+    const Vector2 SCREEN_SIZE = ScreenSize();
+    Vector2 positions[] = {
+        (Vector2){SCREEN_SIZE.x, 0},
+        SCREEN_SIZE,
+        (Vector2){0, SCREEN_SIZE.y},
+        (Vector2){0, 0},
+    };
+    Vector2 start, end = (Vector2){0, 0};
+
+    for(int i = 0; i < 4; i++)
+    {
+        start = end;
+        end = positions[i];
+        DrawLineEx(start, end, width * 2, color);
+    }
+}
+
 GameplaySprites LoadGameSprites(void)
 {
     GameplaySprites sprites = (GameplaySprites){0};

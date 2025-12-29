@@ -2,32 +2,34 @@
 
 ```
 tosu.exe
-textures/
-sounds/
-level/
-  [level_name]
-```
-
-# LEVEL FOLDER
-```
-[Level]/
-  meta.dat
-  # LoadDirectoryFilesEx() can filter for just the chart files
-  easy.chart
-  medium.chart
-  hard.chart
-  wackadoo.chart
-
-  # Same structure as the default asset folders for asset overrides
-  # filenames will be hardcoded for assets
-  textures/    
-    background.png
+resources/
+  sprites/
   sounds/
-    song.ogg
+  data/
+    [data_folder]/
+      # Same structure as the default asset folders for asset overrides
+      # filenames will be hardcoded for assets
+      sprites/
+        sprite_override.ogg
+      sounds/
+        sound_override.ogg
+      song.ogg
+  charts/
+    [chart_folder]/
+      # Store in which data folder the song is,
+      # Store in which data folder sprite and sound overrides are,
+      # Each separately so they can be in different places if desired.
+      # List all charts used charts
+      meta.dat
+      # LoadDirectoryFilesEx() can filter for just the chart files
+      easy.chart
+      medium.chart
+      hard.chart
+      wackadoo.chart
 ```
 
 # WHEN LOADING LEVEL
-`ChangeDirectory()` to the levels dir
+`ChangeDirectory()` to the dir
 Asset overrides can get loaded with static paths this way.
 When done, go back to Application Directory (`GetApplicationDirectory() or ".."`)
 

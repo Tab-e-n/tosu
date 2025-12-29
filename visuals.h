@@ -33,6 +33,8 @@ typedef struct RankSprites {
 } RankSprites;
 
 
+void DrawScreenInline(float width, Color color);
+
 // Load sprites from the current_directory/sprites/
 GameplaySprites LoadGameSprites(void);
 // Have a separate place where you combine them

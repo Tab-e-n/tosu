@@ -335,18 +335,22 @@ int main(void)
                 DebugDrawEditor(&editor);
                 if(mode == INSERT_NORMAL)
                 {
+                    DrawScreenInline(8.0, YELLOW);
                     DrawText("INSERT NORMAL", 144, 32, 24, BLACK);
                 }
                 if(mode == INSERT_HOLD)
                 {
+                    DrawScreenInline(8.0, BLUE);
                     DrawText("INSERT HOLD", 144, 32, 24, BLACK);
                 }
                 if(mode == INSERT_MINE)
                 {
+                    DrawScreenInline(8.0, RED);
                     DrawText("INSERT MINE", 144, 32, 24, BLACK);
                 }
 		if(mode == EDIT_NOTE)
 		{
+                    DrawScreenInline(8.0, PINK);
                     DrawText("EDIT NOTE", 144, 32, 24, BLACK);
 		}
                 break;
