@@ -37,7 +37,6 @@ Speed & difficulty
 General system for scaling based on window size
 
 # LIST
-Hold notes draw 2 hit circles
 Main Menu
 Selecting charts for play and editing
 Playtesting and regular play don't conflict

@@ -229,17 +229,17 @@ bool EditorTiming(EditorChart* editor, bool reset)
 {
     if(reset)
     {
-        editor->move_timer = MOVE_DELAY_FRAMES * 2;
+        editor->move_timer = MOVE_DELAY_FRAMES * 6;
         return false;
     }
-    if(editor->move_timer == MOVE_DELAY_FRAMES * 2)
+    if(editor->move_timer == MOVE_DELAY_FRAMES * 6)
     {
         editor->move_timer--;
         return true;
     }
     if(editor->move_timer <= 0)
     {
-        editor->move_timer = MOVE_DELAY_FRAMES;
+        editor->move_timer = MOVE_DELAY_FRAMES * 3;
         return true;
     }
     editor->move_timer--;

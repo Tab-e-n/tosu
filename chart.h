@@ -7,7 +7,7 @@
 #include "notes.h"
 
 
-#define MOVE_DELAY_FRAMES 15
+#define MOVE_DELAY_FRAMES 5
 #define TIMECODE_SHIFT 10
 
 /*

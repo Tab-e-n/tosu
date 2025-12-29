@@ -27,6 +27,12 @@ int main(void)
     GameSpace game = GameInit();
     extern Options options;
     DefaultOptions();
+    /*
+    for(int i = 0; i < KEY_AMOUNT; i++)
+    {
+        options.bindings[i] = KEY_AMOUNT - i - 1;
+    }
+    */
     char key = 0;
 
     EditorChart editor = (EditorChart){0};

@@ -17,6 +17,13 @@
 #define KEY_AMOUNT 26
 
 
+/*
+ * I got confused on how to use KeycodeBindings so this is now here.
+ * Keyboard - int that stores info about key presses in each bit
+ * Keycode - char that specifies a letter, 0 - 25
+ * KeycodeBindings - list of Keycodes with Keycodes as indices.
+ */
+
 typedef int KeycodeBindings[KEY_AMOUNT];
 typedef int* KeycodeBindingsW;
 
@@ -36,6 +43,7 @@ int GetKeyboardInput(void);
 int GetKeyboardInputRelease(void);
 int KeycodeToKeyboard(char code, KeycodeBindings bindings);
 char KeyboardToKeycode(int key, KeycodeBindings bindings);
+char KeycodeBind(char code, KeycodeBindings bindings);
 
 void DefaultOptions(void);
 

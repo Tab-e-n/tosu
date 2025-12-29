@@ -6,7 +6,7 @@ void DefaultBindings(KeycodeBindingsW bindings)
 {
     for(int i = 0; i < KEY_AMOUNT; i++)
     {
-        bindings[i] = 1 << i;
+        bindings[i] = i;
     }
 }
 
@@ -42,13 +42,17 @@ int GetKeyboardInputRelease()
 
 int KeycodeToKeyboard(char code, KeycodeBindings bindings)
 {
-    return bindings[code];
+    if(code < 0 || code >= KEY_AMOUNT)
+    {
+        return 0;
+    }
+    return 1 << bindings[code];
 }
 
 char KeyboardToKeycode(int key, KeycodeBindings bindings)
 {
     int code = 0;
-    while(bindings[code] != key)
+    while(1 << bindings[code] != key)
     {
         code++;
         if(code >= KEY_AMOUNT)
@@ -57,6 +61,15 @@ char KeyboardToKeycode(int key, KeycodeBindings bindings)
         }
     }
     return code;
+}
+
+char KeycodeBind(char code, KeycodeBindings bindings)
+{
+    if(code < 0 || code >= KEY_AMOUNT)
+    {
+        return 0;
+    }
+    return bindings[code];
 }
 
 Options options = (Options){0};

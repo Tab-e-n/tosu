@@ -221,11 +221,13 @@ void DrawNote(Note note, GameSpace* game, GameplaySprites sprites)
     double hit_circle_scale = NoteHitCircleScale(note.time, note.score, scale, game->time);
     Vector2 hit_circle_position = NoteHitCirclePosition(position, hit_circle_scale, scale, game->time);
 
+    Texture sprite_key = sprites.keys[KeycodeBind(note.key, options.bindings)];
+
     if(note.hold)
     {
         DrawTextureEx(sprites.hold_base, position, 0.0, scale, base_color);
         DrawTextureEx(sprites.hold_outline, position, 0.0, scale, other_color);
-        DrawTextureEx(sprites.keys[note.key], position, 0.0, scale, other_color);
+        DrawTextureEx(sprite_key, position, 0.0, scale, other_color);
 
         DrawTextureEx(sprites.hold_hit_circle, hit_circle_position, 0.0, hit_circle_scale, other_color);
 
@@ -244,13 +246,13 @@ void DrawNote(Note note, GameSpace* game, GameplaySprites sprites)
     {
         DrawTextureEx(sprites.mine_base, position, 0.0, scale, other_color);
         DrawTextureEx(sprites.mine_outline, position, 0.0, scale, base_color);
-        DrawTextureEx(sprites.keys[note.key], position, 0.0, scale, base_color);
+        DrawTextureEx(sprite_key, position, 0.0, scale, base_color);
     }
     else
     {
         DrawTextureEx(sprites.normal_base, position, 0.0, scale, base_color);
         DrawTextureEx(sprites.normal_outline, position, 0.0, scale, other_color);
-        DrawTextureEx(sprites.keys[note.key], position, 0.0, scale, other_color);
+        DrawTextureEx(sprite_key, position, 0.0, scale, other_color);
 
         DrawTextureEx(sprites.normal_hit_circle, hit_circle_position, 0.0, hit_circle_scale, other_color);
     }
