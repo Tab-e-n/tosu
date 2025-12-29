@@ -200,8 +200,10 @@ bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, char color,
     return GameAddNote(game, note);
 }
 
-void GameProcessNotes(GameSpace* game, Options* options)
+void GameProcessNotes(GameSpace* game)
 {
+    extern Options options;
+
     int input = GetKeyboardInput();
     int release = GetKeyboardInputRelease();
     for(int i = 0; i < NOTE_LIMIT; i++)
@@ -229,7 +231,7 @@ void GameProcessNotes(GameSpace* game, Options* options)
                 game->score += HitScorePoints(HIT_PERFECT);
 		GameAddAccuracy(game, HitAccuracy(HIT_PERFECT));
             }
-            else if(NotePressed(note, release, options->bindings))
+            else if(NotePressed(note, release, options.bindings))
             {
                 note.score_end = NoteHoldScore(note, game->time, game->difficulty);
                 if(note.score_end)
@@ -260,7 +262,7 @@ void GameProcessNotes(GameSpace* game, Options* options)
                 TraceLog(LOG_INFO, "MISS: Didn't hit key");
                 note.score = HIT_MISS;
             }
-            if(NotePressed(note, input, options->bindings))
+            if(NotePressed(note, input, options.bindings))
             {
                 note.score = NoteHitScore(note, game->time, game->difficulty, game->offset);
                 if(note.score != HIT_MISS)

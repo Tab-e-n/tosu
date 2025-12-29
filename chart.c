@@ -176,9 +176,10 @@ bool EditorMoveToNext(EditorChart* editor)
     {
         return FAIL;
     }
-    //editor->current = editor->current->next;
-    //editor->current_time = editor->current->note.time;
-    return EditorMoveToTimecode(editor, editor->current->next->note.time);
+    editor->current = editor->current->next;
+    editor->current_time = editor->current->note.time;
+    return OK;
+    //return EditorMoveToTimecode(editor, editor->current->next->note.time);
 }
 
 bool EditorMoveToPrevious(EditorChart* editor)
@@ -187,7 +188,10 @@ bool EditorMoveToPrevious(EditorChart* editor)
     {
         return FAIL;
     }
-    return EditorMoveToTimecode(editor, editor->current->previous->note.time);
+    editor->current = editor->current->previous;
+    editor->current_time = editor->current->note.time;
+    return OK;
+    //return EditorMoveToTimecode(editor, editor->current->previous->note.time);
 }
 
 bool EditorMove(EditorChart* editor, int time)

@@ -21,7 +21,9 @@
 
 #define BASE_HIT_WINDOW 14
 #define NOTE_SPAWN_WINDOW 120
+#define INV_NOTE_SPAWN_WINDOW (1.0/NOTE_SPAWN_WINDOW)
 #define NOTE_DESPAWN_WINDOW 120
+#define INV_NOTE_DESPAWN_WINDOW (1.0/NOTE_DESPAWN_WINDOW)
 
 #define NOTE_LIMIT 128
 
@@ -61,7 +63,7 @@ double GameGetAccuracy(GameSpace* game);
 bool GameAddNote(GameSpace* game, Note note);
 bool GameMakeNote(GameSpace* game, int time, char key, char color, bool mine);
 bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, char color, bool mine);
-void GameProcessNotes(GameSpace* game, Options* options);
+void GameProcessNotes(GameSpace* game);
 
 void DebugDrawNote(Note note, int time);
 void DebugDrawNoteOutline(Note note, Color color);

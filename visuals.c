@@ -92,11 +92,10 @@ void UnloadGameplaySprites(GameplaySprites* sprites)
     }
 }
 
-int NoteAlpha(Note note, int game_time)
+int NoteAlphaStart(int time, int game_time)
 {
-    int anim_time = note.time - game_time;
+    int anim_time = time - game_time;
     int alpha = 255;
-    //alpha = alpha < 0 ? -alpha : alpha;
     if(anim_time >= 0)
     {
         alpha = anim_time;
@@ -106,10 +105,13 @@ int NoteAlpha(Note note, int game_time)
         alpha /= NOTE_SPAWN_WINDOW - ALPHA_HOLD_FRAMES;
         alpha = 255 - alpha;
     }
-    if(note.hold && note.score != HIT_MISS)
-    {
-        anim_time = note.time_end - game_time;
-    }
+    return alpha;
+}
+
+int NoteAlphaEnd(int time, int game_time)
+{
+    int anim_time = time - game_time;
+    int alpha = 255;
     if(anim_time < 0)
     {
         alpha = anim_time;
@@ -124,14 +126,24 @@ int NoteAlpha(Note note, int game_time)
     return alpha;
 }
 
-void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites sprites)
+int NoteAlpha(Note note, int game_time)
 {
-    // TODO: Clean up this code a tad
+    int alpha = NoteAlphaStart(note.time, game_time);
+    int alpha_end = 255;
+    if(note.hold && note.score != HIT_MISS)
+    {
+        alpha_end = NoteAlphaEnd(note.time_end, game_time);
+    }
+    else
+    {
+        alpha_end = NoteAlphaEnd(note.time, game_time);
+    }
+    return alpha < alpha_end ? alpha : alpha_end;
+}
+
+Vector2 NotePosition(char note_key, double scale)
+{
     const Vector2 SCREEN_SIZE = ScreenSize();
-    const Vector2 SCREEN_SCALE = ScreenScale();
-    float scale = 1.0;
-    scale = (SCREEN_SCALE.x > SCREEN_SCALE.y ? SCREEN_SCALE.y : SCREEN_SCALE.x) * 0.25;
-    const int SPRITE_SIZE = 320;
     const int SPACING = scale * (SPRITE_SIZE + 32);
     const int ROW_2_OFFSET = scale * (SPRITE_SIZE >> 2);
     const int ROW_3_OFFSET = ROW_2_OFFSET * 3;
@@ -140,27 +152,64 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
         (SCREEN_SIZE.x - SPACING * 10) * 0.5,
         (SCREEN_SIZE.y - SPACING * 3) * 0.5
     };
-    const double INV_NOTE_SPAWN_WINDOW = 1.0 / NOTE_SPAWN_WINDOW;
+
+    Vector2 position = START_POS;
+    if(note_key < FIRST_KEY_ROW)
+    {
+        position.x += note_key * SPACING;
+    }
+    else if(note_key < SECOND_KEY_ROW)
+    {
+        position.x += (note_key - FIRST_KEY_ROW) * SPACING + ROW_2_OFFSET;
+        position.y += SPACING;
+    }
+    else
+    {
+        position.x += (note_key - SECOND_KEY_ROW) * SPACING + ROW_3_OFFSET;
+        position.y += 2 * SPACING;
+    }
+
+    return position;
+}
+
+double NoteHitCircleScale(int note_time, char score, double scale, int game_time)
+{
+    int hit_time;
+    if(score == HIT_NULL)
+    {
+        hit_time = note_time - game_time;
+        hit_time = hit_time < 0 ? 0 : hit_time;
+    }
+    else
+    {
+        hit_time = 0;
+    }
+    return scale + hit_time * scale * INV_NOTE_SPAWN_WINDOW;
+}
+
+Vector2 NoteHitCirclePosition(Vector2 position, double hit_circle_scale, double scale, int game_time)
+{
+    double offset = hit_circle_scale * SPRITE_SIZE * 0.5;
+    double center = scale * SPRITE_SIZE * 0.5;
+    Vector2 hit_circle_position = position;
+    hit_circle_position.x += center - offset;
+    hit_circle_position.y += center - offset;
+    return hit_circle_position;
+}
+
+void DrawNote(Note note, GameSpace* game, GameplaySprites sprites)
+{
+    extern Options options;
 
     if(!note.active)
     {
         return;
     }
-    Vector2 position = START_POS;
-    if(note.key < FIRST_KEY_ROW)
-    {
-        position.x += note.key * SPACING;
-    }
-    else if(note.key < SECOND_KEY_ROW)
-    {
-        position.x += (note.key - FIRST_KEY_ROW) * SPACING + ROW_2_OFFSET;
-        position.y += SPACING;
-    }
-    else
-    {
-        position.x += (note.key - SECOND_KEY_ROW) * SPACING + ROW_3_OFFSET;
-        position.y += 2 * SPACING;
-    }
+
+    const Vector2 SCREEN_SCALE = ScreenScale();
+    float scale = (SCREEN_SCALE.x > SCREEN_SCALE.y ? SCREEN_SCALE.y : SCREEN_SCALE.x) * 0.25;
+
+    Vector2 position = NotePosition(note.key, scale);
 
     Color base_color = game->colors[note.color];
     Color other_color = (note.mine ? MINE_COLOR : OUTLINE_COLOR);
@@ -169,31 +218,8 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
     base_color.a = alpha;
     other_color.a = alpha;
 
-    int anim_time = note.time - game->time;
-
-    int hit_time = anim_time < 0 ? 0 : anim_time;
-    if(note.being_held)
-    {
-        if(note.score_end != HIT_NULL)
-        {
-            hit_time = 0;
-        }
-        else
-        {
-            hit_time = note.time_end - game->time;
-            hit_time = hit_time < 0 ? 0 : hit_time;
-        }
-    }
-    else if(note.score != HIT_NULL)
-    {
-        hit_time = 0;
-    }
-    double hit_circle_scale = scale + hit_time * scale * INV_NOTE_SPAWN_WINDOW;
-    double offset = hit_circle_scale * SPRITE_SIZE * 0.5;
-    double center = scale * SPRITE_SIZE * 0.5;
-    Vector2 hit_circle_position = position;
-    hit_circle_position.x += center - offset;
-    hit_circle_position.y += center - offset;
+    double hit_circle_scale = NoteHitCircleScale(note.time, note.score, scale, game->time);
+    Vector2 hit_circle_position = NoteHitCirclePosition(position, hit_circle_scale, scale, game->time);
 
     if(note.hold)
     {
@@ -202,6 +228,17 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
         DrawTextureEx(sprites.keys[note.key], position, 0.0, scale, other_color);
 
         DrawTextureEx(sprites.hold_hit_circle, hit_circle_position, 0.0, hit_circle_scale, other_color);
+
+        if(note.time_end - game->time < NOTE_SPAWN_WINDOW)
+        {
+            int alpha_hit = NoteAlphaStart(note.time_end, game->time);
+            alpha_hit = alpha < alpha_hit ? alpha : alpha_hit;
+            hit_circle_scale = NoteHitCircleScale(note.time_end, note.score_end, scale, game->time);
+            hit_circle_position = NoteHitCirclePosition(position, hit_circle_scale, scale, game->time);
+            Color hit_color = other_color;
+            hit_color.a = alpha_hit;
+            DrawTextureEx(sprites.hold_hit_circle, hit_circle_position, 0.0, hit_circle_scale, hit_color);
+        }
     }
     else if(note.mine)
     {
@@ -220,6 +257,7 @@ void DrawNote(Note note, GameSpace* game, Options* options, GameplaySprites spri
 
     if(note.hold)
     {
+        int anim_time = note.time - game->time;
         int score_time = anim_time > 0 ? 0 : -anim_time;
         if(note.score_end != HIT_NULL)
         {
@@ -262,12 +300,14 @@ void DrawNoteScore(char score, Vector2 position, double scale, GameplaySprites s
     DrawTextureEx(used_texture, position, 0.0, scale, WHITE);
 }
 
-void GameDrawNotes(GameSpace* game, Options* options, GameplaySprites sprites)
+void GameDrawNotes(GameSpace* game, GameplaySprites sprites)
 {
+    extern Options options;
+
     for(int i = 0; i < NOTE_LIMIT; i++)
     {
         Note note = game->notes[i];
-        DrawNote(note, game, options, sprites);
+        DrawNote(note, game, sprites);
     }
 }
 

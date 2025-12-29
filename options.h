@@ -32,12 +32,12 @@ typedef struct WindowManager {
 
 void DefaultBindings(KeycodeBindingsW bindings);
 
-int GetKeyboardInput();
-int GetKeyboardInputRelease();
+int GetKeyboardInput(void);
+int GetKeyboardInputRelease(void);
 int KeycodeToKeyboard(char code, KeycodeBindings bindings);
 char KeyboardToKeycode(int key, KeycodeBindings bindings);
 
-Options DefaultOptions();
+void DefaultOptions(void);
 
 void UpdateWindowManager(void);
 Vector2 ScreenScale(void);

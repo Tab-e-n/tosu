@@ -25,7 +25,8 @@ int main(void)
 
     Chart* chart = (Chart*)0;
     GameSpace game = GameInit();
-    Options options = DefaultOptions();
+    extern Options options;
+    DefaultOptions();
     char key = 0;
 
     EditorChart editor = (EditorChart){0};
@@ -46,7 +47,7 @@ int main(void)
             {
                 ChartReadNext(chart, &game);
             }
-            GameProcessNotes(&game, &options);
+            GameProcessNotes(&game);
             if(IsKeyPressed(KEY_ENTER))
             {
                 free(chart);
@@ -185,32 +186,39 @@ int main(void)
 		*/
             }
 	    // current_color = 0 is reserved for mines
+            bool change_color = false;
             if(IsKeyPressed(KEY_ONE))
             {
-		TraceLog(LOG_INFO, "1:\t Color 1");
                 current_color = 1;
-		if(mode == EDIT_NOTE) EditorColorCurrentNote(&editor, current_color);
+                change_color = true;
             }
             if(IsKeyPressed(KEY_TWO))
             {
-		TraceLog(LOG_INFO, "2:\t Color 2");
                 current_color = 2;
-		if(mode == EDIT_NOTE) EditorColorCurrentNote(&editor, current_color);
+                change_color = true;
             }
             if(IsKeyPressed(KEY_THREE))
             {
-		TraceLog(LOG_INFO, "3:\t Color 3");
                 current_color = 3;
+                change_color = true;
+            }
+            if(change_color)
+            {
+		TraceLog(LOG_INFO, "%i:\t Color %i", current_color, current_color);
 		if(mode == EDIT_NOTE) EditorColorCurrentNote(&editor, current_color);
             }
+
+            bool left_pressed = IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_COMMA);
+            bool right_pressed = IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_PERIOD);
+
             if(IsKeyDown(KEY_LEFT_CONTROL) && mode != EDIT_NOTE)
             {
-                if(IsKeyPressed(KEY_LEFT))
+                if(left_pressed)
                 {
 		    TraceLog(LOG_INFO, "ctrl+left:\t First Note / Start");
                     EditorMoveToStart(&editor);
                 }
-                if(IsKeyPressed(KEY_RIGHT))
+                if(right_pressed)
                 {
 		    TraceLog(LOG_INFO, "ctrl+right:\t Last Note / End");
                     EditorMoveToEnd(&editor);
@@ -218,20 +226,25 @@ int main(void)
             }
             else
             {
-                char speed = MOVE_DELAY_FRAMES;
+                char speed = 3;
                 if(IsKeyDown(KEY_LEFT_SHIFT))
                 {
-                    speed *= 0.33334;
+                    speed = 1;
                 }
                 if(IsKeyDown(KEY_LEFT_ALT))
                 {
                     speed *= 4;
                 }
+                if(!IsKeyDown(KEY_PERIOD) && !IsKeyDown(KEY_COMMA))
+                {
+                    speed *= MOVE_DELAY_FRAMES;
+                }
+
 		if(mode == EDIT_NOTE && edit_duration)
 		{
 		    if(editor.current != (void*)0 && editor.current->note.hold)
 		    {
-			if(IsKeyDown(KEY_LEFT) && EditorTiming(&editor, false))
+			if(left_pressed && EditorTiming(&editor, false))
 			{
 			    editor.current->note.time_end -= speed;
 			    if(editor.current->note.time_end < 0)
@@ -239,7 +252,7 @@ int main(void)
 				editor.current->note.time_end = 0;
 			    }
 			}
-			if(IsKeyDown(KEY_RIGHT) && EditorTiming(&editor, false))
+			if(right_pressed && EditorTiming(&editor, false))
 			{
 			    editor.current->note.time_end += speed;
 			}
@@ -247,22 +260,22 @@ int main(void)
 		}
 		else if(mode == EDIT_NOTE)
 		{
-		    if(IsKeyDown(KEY_LEFT) && EditorTiming(&editor, false))
+		    if(left_pressed && EditorTiming(&editor, false))
 		    {
 			EditorMoveCurrentNote(&editor, -speed);
 		    }
-		    if(IsKeyDown(KEY_RIGHT) && EditorTiming(&editor, false))
+		    if(right_pressed && EditorTiming(&editor, false))
 		    {
 			EditorMoveCurrentNote(&editor, speed);
 		    }
 		}
 		else
 		{
-		    if(IsKeyDown(KEY_LEFT))
+		    if(left_pressed)
 		    {
 			EditorMoveTimed(&editor, -speed);
 		    }
-		    if(IsKeyDown(KEY_RIGHT))
+		    if(right_pressed)
 		    {
 			EditorMoveTimed(&editor, speed);
 		    }
@@ -276,7 +289,7 @@ int main(void)
             {
                 EditorMoveToPrevious(&editor);
             }
-            if(!IsKeyDown(KEY_LEFT) && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN))
+            if(!left_pressed && !right_pressed && !IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN))
             {
                 EditorTiming(&editor, true);
             }
@@ -299,7 +312,7 @@ int main(void)
                 bg = (Color){22, 15, 22, 255};
                 ClearBackground(bg);
                 // DebugDrawGame(&game);
-                GameDrawNotes(&game, &options, game_sprites);
+                GameDrawNotes(&game, game_sprites);
                 break;
             case EDITOR:
                 bg = (Color){248, 224, 255, 255};

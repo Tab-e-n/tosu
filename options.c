@@ -59,11 +59,12 @@ char KeyboardToKeycode(int key, KeycodeBindings bindings)
     return code;
 }
 
-Options DefaultOptions(void)
+Options options = (Options){0};
+
+void DefaultOptions(void)
 {
-    Options options = (Options){0};
+    options = (Options){0};
     DefaultBindings(options.bindings);
-    return options;
 }
 
 WindowManager wscale = (WindowManager){0};
