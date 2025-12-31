@@ -2,7 +2,7 @@
 #include "options.h"
 
 
-void DefaultBindings(KeycodeBindingsW bindings)
+void BindingsDefault(KeycodeBindingsW bindings)
 {
     for(int i = 0; i < KEY_AMOUNT; i++)
     {
@@ -74,10 +74,10 @@ char KeycodeBind(char code, KeycodeBindings bindings)
 
 Options options = (Options){0};
 
-void DefaultOptions(void)
+void OptionsDefault(void)
 {
     options = (Options){0};
-    DefaultBindings(options.bindings);
+    BindingsDefault(options.bindings);
 }
 
 WindowManager wscale = (WindowManager){0};
@@ -120,7 +120,7 @@ bool InputTiming(char* timer, bool reset)
     }
     if(*timer == MENU_MOVE_TIMER * 2)
     {
-        *timer -= 1;
+        --*timer;
         return true;
     }
     if(*timer <= 0)
@@ -128,7 +128,7 @@ bool InputTiming(char* timer, bool reset)
         *timer = MENU_MOVE_TIMER;
         return true;
     }
-    *timer -= 1;
+    --*timer;
     return false;
 }
 
@@ -197,12 +197,17 @@ int MenuListCurrent(MenuList* menu)
 
 void LoadNewDirectory(FilePathList* files, const char* dir)
 {
-    if(files->count != 0) UnloadDirectoryFiles(*files);
+    UnloadLoadedDirectory(files);
     *files = LoadDirectoryFiles(dir);
 }
 
 void LoadNewDirectoryEx(FilePathList* files, const char* dir, const char* filter)
 {
-    if(files->count != 0) UnloadDirectoryFiles(*files);
+    UnloadLoadedDirectory(files);
     *files = LoadDirectoryFilesEx(dir, filter, false);
+}
+
+void UnloadLoadedDirectory(FilePathList* files)
+{
+    if(files->count != 0) UnloadDirectoryFiles(*files);
 }

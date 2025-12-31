@@ -4,6 +4,43 @@
 #include "notes.h"
 #include "chart.h"
 
+int NoteToInt(Note note)
+{
+    int code = 0;
+    if(note.hold)
+    {
+        code += 0b10;
+    }
+    if(note.mine)
+    {
+        code += 0b100;
+    }
+    code += note.key << 3;
+    code += note.color << 8;
+    code += note.time << TIMECODE_SHIFT;
+    //TraceLog(LOG_INFO, "%i, h%i m%i k%i t%i", code, note.hold, note.mine, note.key, note.time);
+    return code;
+}
+
+Note IntToNote(int code)
+{
+    Note note = (Note){0};
+    if(code & 0b10)
+    {
+        note.hold = true;
+    }
+    if(code & 0b100)
+    {
+        note.mine = true;
+    }
+    note.key = (code >> 3) & 0b11111;
+    note.color = (code >> 8) & 0b11;
+    note.time = code >> TIMECODE_SHIFT;
+    note.active = true;
+    //TraceLog(LOG_INFO, "%i, h%i m%i k%i t%i", code, note.hold, note.mine, note.key, note.time);
+    return note;
+}
+
 int SizeOfChart(Chart* chart)
 {
     if(chart != (void*)0)
@@ -145,6 +182,76 @@ bool SaveChart(Chart* chart, const char* filename)
     }
 
     return success;
+}
+
+void ChartFilenameClear(ChartFilename* filename)
+{
+    filename->current = 0;
+    for(int i = 0; i < FILENAME_CHARACTERS_INTERNAL; i++)
+    {
+        filename->str[i] = '\0';
+    }
+}
+
+bool ChartFilenameAddChar(ChartFilename* filename, char c)
+{
+    if(filename->current >= MAX_FILENAME_CHARACTERS)
+    {
+        return FAIL;
+    }
+    filename->str[filename->current] = c;
+    filename->current++;
+    return OK;
+}
+
+bool ChartFilenameRemoveChar(ChartFilename* filename)
+{
+    if(filename->current <= 0)
+    {
+        return FAIL;
+    }
+    filename->current--;
+    filename->str[filename->current] = '\0';
+    return OK;
+}
+
+void ChartFilenameSuffix(ChartFilename* filename)
+{
+    char suffix[] = ".chart";
+    for(int i = 0; i < 6; i++)
+    {
+        filename->str[filename->current + i] = suffix[i];
+    }
+}
+
+void ChartFilenameRemoveSuffix(ChartFilename* filename)
+{
+    for(int i = 0; i < 6; i++)
+    {
+        filename->str[filename->current + i] = '\0';
+    }
+}
+
+bool ChartFilenameFill(ChartFilename* filename, const char* str)
+{
+    if(str == (void*)0)
+    {
+        return FAIL;
+    }
+    filename->current = 0;
+    int i = 0;
+    char c = 0;
+    while((c = str[i]) != '\0')
+    {
+        filename->str[i++] = c;
+        if(i >= MAX_FILENAME_CHARACTERS)
+        {
+            ChartFilenameClear(filename);
+            return FAIL;
+        }
+    }
+    filename->current = i;
+    return OK;
 }
 
 bool EditorMoveToStart(EditorChart* editor)
@@ -290,7 +397,7 @@ bool EditorAddNote(EditorChart* editor, Note note)
     else
     {
         // If there is no current note, there shouldn't be any start or end notes aswell
-        // Checks are mostlikely redundant, maybe even detrimental?
+        // Checks are mostlikely redundant
         //TraceLog(LOG_INFO, "current doesn't exists");
         if(editor->start == (void*)0)
         {
@@ -338,7 +445,7 @@ bool EditorRemoveNote(EditorChart* editor)
     }
     else
     {
-        // Current note's next was empty, it was at the end if the list, something need to be put instead of it
+        // Current note's next was empty, it was at the end if the list, something needs to be put instead of it
         editor->end = previous;
     }
     return OK; 
@@ -346,14 +453,15 @@ bool EditorRemoveNote(EditorChart* editor)
 
 bool EditorClearNotes(EditorChart* editor)
 {
-    editor->start = (void*)0;
-    editor->end = (void*)0;
+    editor->current = editor->start;
     while(editor->current != (void*)0)
     {
         EditorNote* next = editor->current->next;
         free(editor->current);
         editor->current = next;
     }
+    editor->start = (void*)0;
+    editor->end = (void*)0;
     EditorMoveToStart(editor);
     return OK;
 }
@@ -422,6 +530,20 @@ bool EditorColorCurrentNote(EditorChart* editor, char color)
     return FAIL;
 }
 
+void EditorDefault(EditorChart* editor)
+{
+    EditorClearNotes(editor);
+    *editor = (EditorChart){0};
+    editor->note = (Note){0};
+    editor->current_time = 0;
+    editor->difficulty = 0;
+    editor->speed = 0;
+    editor->move_timer = 0;
+    editor->current_color = 1;
+    editor->mode = EM_MAIN;
+    editor->edit_duration = false;
+}
+
 Chart* EditorToChart(EditorChart* editor)
 {
     TraceLog(LOG_INFO, "Converting EditorChart to Chart");
@@ -487,41 +609,248 @@ bool ChartToEditor(Chart* chart, EditorChart* editor)
     return OK;
 }
 
-int NoteToInt(Note note)
+EditorProcessCode EditorProcess(EditorChart* editor)
 {
-    int code = 0;
-    if(note.hold)
-    {
-        code += 0b10;
-    }
-    if(note.mine)
-    {
-        code += 0b100;
-    }
-    code += note.key << 3;
-    code += note.color << 8;
-    code += note.time << TIMECODE_SHIFT;
-    //TraceLog(LOG_INFO, "%i, h%i m%i k%i t%i", code, note.hold, note.mine, note.key, note.time);
-    return code;
-}
+    extern Options options;
+    
+    EditorProcessCode process_code = EDITOR_CONTINUE;
 
-Note IntToNote(int code)
-{
-    Note note = (Note){0};
-    if(code & 0b10)
+    // TraceLog(LOG_INFO, "k:\t ");
+    int input = GetKeyboardInput();
+    if(editor->mode == EM_INSERT_NORMAL || editor->mode == EM_INSERT_MINE)
     {
-        note.hold = true;
+        if(input)
+        {
+            editor->note = (Note){0};
+            editor->note.active = true;
+            editor->note.time = editor->current_time;
+            editor->note.key = KeyboardToKeycode(input, options.bindings);
+            if(editor->mode == EM_INSERT_MINE)
+            {
+                editor->note.mine = true;
+                editor->note.color = 0;
+            }
+            else
+            {
+                editor->note.color = editor->current_color;
+            }
+            EditorAddNote(editor, editor->note);
+            editor->note.active = false;
+        }
     }
-    if(code & 0b100)
+    if(editor->mode == EM_INSERT_HOLD)
     {
-        note.mine = true;
+        if(input && !editor->note.active)
+        {
+            editor->note = (Note){0};
+            editor->note.active = true;
+            editor->note.time = editor->current_time;
+            editor->note.time_end = editor->current_time;
+            editor->note.key = KeyboardToKeycode(input, options.bindings);
+            editor->note.color = editor->current_color;
+            editor->note.hold = true;
+        }
+        else if(input && editor->note.active)
+        {
+            editor->note.time_end = editor->current_time;
+            EditorAddNote(editor, editor->note);
+            editor->note.active = false;
+        }
     }
-    note.key = (code >> 3) & 0b11111;
-    note.color = (code >> 8) & 0b11;
-    note.time = code >> TIMECODE_SHIFT;
-    note.active = true;
-    //TraceLog(LOG_INFO, "%i, h%i m%i k%i t%i", code, note.hold, note.mine, note.key, note.time);
-    return note;
+    if(editor->mode == EM_EDIT_NOTE)
+    {
+        if(editor->current != (void*)0 && input)
+        {
+            editor->current->note.key = KeyboardToKeycode(input, options.bindings);
+        }
+        if(IsKeyPressed(KEY_TAB))
+        {
+            editor->edit_duration = !editor->edit_duration;
+            if(editor->edit_duration)
+            {
+                TraceLog(LOG_INFO, "tab:\t Edit Hold Duration");
+            }
+            else
+            {
+                TraceLog(LOG_INFO, "tab:\t Edit Note Time");
+            }
+        }
+    }
+    if(editor->mode == EM_MAIN)
+    {
+        if(IsKeyPressed(KEY_ENTER))
+        {
+            process_code = EDITOR_EXIT_PLAYTEST;
+        }
+        if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_L))
+        {
+            TraceLog(LOG_INFO, "ctrl+l:\t Load Chart");
+            process_code = EDITOR_LOAD_CHART;
+        }
+        if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
+        {
+            TraceLog(LOG_INFO, "ctrl+s:\t Save Chart");
+            process_code = EDITOR_SAVE_CHART;
+        }
+        if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_O))
+        {
+            TraceLog(LOG_INFO, "ctrl+o:\t Clear Chart");
+            EditorClearNotes(editor);
+        }
+        if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_P))
+        {
+            TraceLog(LOG_INFO, "ctrl+p:\t Print Editor Notes");
+            PrintEditor(editor);
+        }
+        if(IsKeyPressed(KEY_N))
+        {
+            TraceLog(LOG_INFO, "n:\t Mode INSERT NORMAL");
+            editor->mode = EM_INSERT_NORMAL;
+        }
+        if(IsKeyPressed(KEY_H))
+        {
+            TraceLog(LOG_INFO, "h:\t Mode INSERT HOLD");
+            editor->mode = EM_INSERT_HOLD;
+        }
+        if(IsKeyPressed(KEY_M))
+        {
+            TraceLog(LOG_INFO, "m:\t Mode INSERT MINE");
+            editor->mode = EM_INSERT_MINE;
+        }
+        if(IsKeyPressed(KEY_E))
+        {
+            TraceLog(LOG_INFO, "e:\t Mode EDIT NOTE");
+            editor->mode = EM_EDIT_NOTE;
+        }
+    }
+    if(editor->mode == EM_EXIT)
+    {
+        if(IsKeyPressed(KEY_ENTER))
+        {
+            process_code = EDITOR_EXIT_MENU;
+        }
+    }
+    // GENERIC EDITOR
+    if(IsKeyPressed(KEY_BACKSPACE))
+    {
+        EditorRemoveNote(editor);
+        /*
+        if(editor->mode == EM_EDIT_NOTE)
+        {
+            TraceLog(LOG_INFO, "Exited EDIT NOTE to MAIN");
+            editor->mode = EM_MAIN;
+        }
+        */
+    }
+    // current_color = 0 is reserved for mines
+    const int COLOR_KEYS[] = {KEY_ONE, KEY_TWO, KEY_THREE};
+    for(int i = 0; i < 3; i++)
+    {
+        if(IsKeyPressed(COLOR_KEYS[i]))
+        {
+            editor->current_color = i + 1;
+            TraceLog(LOG_INFO, "%i:\t Color %i", editor->current_color, editor->current_color);
+            if(editor->mode == EM_EDIT_NOTE) EditorColorCurrentNote(editor, editor->current_color);
+        }
+    }
+
+    bool left_pressed = IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_COMMA);
+    bool right_pressed = IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_PERIOD);
+
+    if(IsKeyDown(KEY_LEFT_CONTROL) && editor->mode != EM_EDIT_NOTE)
+    {
+        if(left_pressed)
+        {
+            TraceLog(LOG_INFO, "ctrl+left:\t First Note / Start");
+            EditorMoveToStart(editor);
+        }
+        if(right_pressed)
+        {
+            TraceLog(LOG_INFO, "ctrl+right:\t Last Note / End");
+            EditorMoveToEnd(editor);
+        }
+    }
+    else
+    {
+        char speed = IsKeyDown(KEY_LEFT_SHIFT) ? 1 : 3;
+        if(IsKeyDown(KEY_LEFT_ALT))
+        {
+            speed *= 4;
+        }
+        if(!IsKeyDown(KEY_PERIOD) && !IsKeyDown(KEY_COMMA))
+        {
+            speed *= MOVE_DELAY_FRAMES;
+        }
+
+        if(editor->mode == EM_EDIT_NOTE && editor->edit_duration)
+        {
+            if(editor->current != (void*)0 && editor->current->note.hold)
+            {
+                if(left_pressed && InputTiming(&editor->move_timer, false))
+                {
+                    editor->current->note.time_end -= speed;
+                    if(editor->current->note.time_end < 0)
+                    {
+                        editor->current->note.time_end = 0;
+                    }
+                }
+                if(right_pressed && InputTiming(&editor->move_timer, false))
+                {
+                    editor->current->note.time_end += speed;
+                }
+            }
+        }
+        else if(editor->mode == EM_EDIT_NOTE)
+        {
+            if(left_pressed && InputTiming(&editor->move_timer, false))
+            {
+                EditorMoveCurrentNote(editor, -speed);
+            }
+            if(right_pressed && InputTiming(&editor->move_timer, false))
+            {
+                EditorMoveCurrentNote(editor, speed);
+            }
+        }
+        else
+        {
+            if(left_pressed)
+            {
+                EditorMoveTimed(editor, -speed);
+            }
+            if(right_pressed)
+            {
+                EditorMoveTimed(editor, speed);
+            }
+        }
+    }
+    if(IsKeyDown(KEY_UP) && InputTiming(&editor->move_timer, false))
+    {
+        EditorMoveToNext(editor);
+    }
+    if(IsKeyDown(KEY_DOWN) && InputTiming(&editor->move_timer, false))
+    {
+        EditorMoveToPrevious(editor);
+    }
+    if(!left_pressed && !right_pressed && !IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN))
+    {
+        InputTiming(&editor->move_timer, true);
+    }
+    if(IsKeyPressed(KEY_ESCAPE))
+    {
+        if(editor->mode == EM_MAIN)
+        {
+            TraceLog(LOG_INFO, "esc:\t Exit Attempt");
+            editor->mode = EM_EXIT;
+        }
+        else
+        {
+            TraceLog(LOG_INFO, "esc:\t Mode MAIN");
+            editor->mode = EM_MAIN;
+            editor->note.active = false;
+        }
+    }
+
+    return process_code;
 }
 
 void PrintEditor(EditorChart* editor)
@@ -551,11 +880,21 @@ void PrintEditor(EditorChart* editor)
 void DebugDrawEditor(EditorChart* editor)
 {
     //TraceLog(LOG_INFO, "Debug Draw Editor");
+    if(editor->note.active)
+    {
+        DebugDrawNoteOutline(editor->note, BLUE);
+        DrawText(TextFormat("(%i)", editor->note.time), 96, 64, 24, BLUE);
+    }
+    if(editor->edit_duration && editor->current != (void*)0)
+    {
+        DrawText(TextFormat("(%i)", editor->current->note.time_end), 96, 64, 24, BLUE);
+    }
+
     if(editor->current != (void*)0)
     {
         DebugDrawNoteOutline(editor->current->note, BLACK);
     }
-    const int NOTE_CUTOFF = 60;
+
     EditorNote* current = editor->start;
     int i = 0;
     while(current != (void*)0)
@@ -572,7 +911,7 @@ void DebugDrawEditor(EditorChart* editor)
         {
             int diff = note.time - editor->current_time;
             int diff2 = editor->current_time - note.time_end;
-            if(diff < NOTE_CUTOFF && diff2 < NOTE_CUTOFF)
+            if(diff < NOTE_SPAWN_WINDOW && diff2 < NOTE_DESPAWN_WINDOW)
             {
                 DebugDrawNote(note, editor->current_time);
             }
@@ -580,8 +919,8 @@ void DebugDrawEditor(EditorChart* editor)
         else
         {
             int diff = note.time - editor->current_time;
-            diff = diff < 0 ? -diff : diff;
-            if(diff < NOTE_CUTOFF)
+            int diff2 = editor->current_time - note.time;
+            if(diff < NOTE_SPAWN_WINDOW && diff2 < NOTE_DESPAWN_WINDOW)
             {
                 DebugDrawNote(note, editor->current_time);
             }

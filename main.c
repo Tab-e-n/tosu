@@ -7,7 +7,6 @@
 
 typedef enum GameScene {LOGO, MENU, GAME, EDITOR} GameScene;
 typedef enum MainMenuOptions {MAIN_PLAY, MAIN_EDIT, MAIN_OPTIONS, MAIN_EXIT} MainMenuOptions;
-typedef enum EditorMode {MAIN, INSERT_NORMAL, INSERT_HOLD, INSERT_MINE, EDIT_NOTE} EditorMode;
 
 
 int main(void)
@@ -27,7 +26,7 @@ int main(void)
     FilePathList files = (FilePathList){0};
 
     extern Options options;
-    DefaultOptions();
+    OptionsDefault();
     /*
     for(int i = 0; i < KEY_AMOUNT; i++)
     {
@@ -42,10 +41,12 @@ int main(void)
     GameSpace game = GameInit();
 
     EditorChart editor = (EditorChart){0};
-    EditorMode mode = MAIN;
-    Note hold_note = (Note){0};
-    char current_color = 1;
-    bool edit_duration = false;
+    EditorDefault(&editor);
+
+    ChartFilename filename = (ChartFilename){0};
+    ChartFilenameFill(&filename, "test");
+    char entering_filename = 0;
+    char entering_filename_timer = 0;
 
     GameplaySprites game_sprites = LoadGameSprites();
 
@@ -55,7 +56,7 @@ int main(void)
         switch(scene)
         {
         case MENU:
-            if(MenuListHasChosen(&main_menu) && MenuListCurrent(&main_menu) == MAIN_OPTIONS)
+            if(MenuListHasChosen(&main_menu) && (MenuListCurrent(&main_menu) == MAIN_OPTIONS))
             {
                 if(IsKeyPressed(KEY_ESCAPE))
                 {
@@ -102,7 +103,8 @@ int main(void)
                         LoadNewDirectory(&files, "charts");
                         break;
                     case MAIN_EDIT:
-                        LoadNewDirectory(&files, "charts");
+                        scene = EDITOR;
+                        //LoadNewDirectory(&files, "charts");
                         break;
                     case MAIN_OPTIONS:
                         break;
@@ -172,273 +174,122 @@ int main(void)
             break;
 
         case EDITOR:
-	    // TraceLog(LOG_INFO, "k:\t ");
-            int input = GetKeyboardInput();
-            if(mode == INSERT_NORMAL || mode == INSERT_MINE)
+            if(entering_filename)
             {
-                if(input)
+                if(IsKeyDown(KEY_BACKSPACE) && InputTiming(&entering_filename_timer, false))
                 {
-                    Note note = (Note){0};
-                    note.active = true;
-                    note.time = editor.current_time;
-                    note.key = KeyboardToKeycode(input, options.bindings);
-                    if(mode == INSERT_MINE)
-                    {
-                        note.mine = true;
-			note.color = 0;
-                    }
-		    else
-		    {
-			note.color = current_color;
-		    }
-                    EditorAddNote(&editor, note);
+                    ChartFilenameRemoveChar(&filename);
                 }
-            }
-            if(mode == INSERT_HOLD)
-            {
-                if(input && !hold_note.active)
+                if(!IsKeyDown(KEY_BACKSPACE))
                 {
-                    hold_note = (Note){0};
-                    hold_note.active = true;
-                    hold_note.time = editor.current_time;
-                    hold_note.key = KeyboardToKeycode(input, options.bindings);
-                    hold_note.color = current_color;
-                    hold_note.hold = true;
+                    InputTiming(&entering_filename_timer, true);
                 }
-                else if(input && hold_note.active)
+
+                char c = GetCharPressed();
+                if(c)
                 {
-                    hold_note.time_end = editor.current_time;
-                    EditorAddNote(&editor, hold_note);
-                    hold_note.active = false;
+                    ChartFilenameAddChar(&filename, c);
                 }
-            }
-	    if(mode == EDIT_NOTE)
-	    {
-                if(editor.current != (void*)0 && input)
-		{
-                    editor.current->note.key = KeyboardToKeycode(input, options.bindings);
-		}
-		if(IsKeyPressed(KEY_TAB))
-		{
-		    edit_duration = !edit_duration;
-		    if(edit_duration)
-		    {
-			TraceLog(LOG_INFO, "tab:\t Edit Hold Duration");
-		    }
-		    else
-		    {
-			TraceLog(LOG_INFO, "tab:\t Edit Note Time");
-		    }
-		}
-	    }
-            if(mode == MAIN)
-            {
                 if(IsKeyPressed(KEY_ENTER))
                 {
-                    chart = EditorToChart(&editor);
-                    scene = GAME;
-                    game = GameInit();
-                    game.time = -60;
-                }
-                if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
-                {
-		    TraceLog(LOG_INFO, "ctrl+s:\t Save Chart");
-                    Chart* temp_chart = EditorToChart(&editor);
-                    SaveChart(temp_chart, "test.chart");
-                    free(temp_chart);
-                }
-                if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_L))
-                {
-		    TraceLog(LOG_INFO, "ctrl+l:\t Load Chart");
-                    ChartLoadResult result = LoadChart("test.chart");
-                    if(result.success)
+                    ChartFilenameSuffix(&filename);
+                    if(entering_filename == 1)
                     {
-                        EditorClearNotes(&editor);
-                        ChartToEditor(result.chart, &editor);
+                        ChartLoadResult result = LoadChart(filename.str);
+                        if(result.success)
+                        {
+                            EditorClearNotes(&editor);
+                            ChartToEditor(result.chart, &editor);
+                        }
+                        free(result.chart);
                     }
-                    free(result.chart);
+                    if(entering_filename == 2)
+                    {
+                        Chart* temp_chart = EditorToChart(&editor);
+                        SaveChart(temp_chart, filename.str);
+                        free(temp_chart);
+                    }
+                    ChartFilenameRemoveSuffix(&filename);
+                    entering_filename = 0;
                 }
-                if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_O))
+                if(IsKeyPressed(KEY_ESCAPE))
                 {
-                    TraceLog(LOG_INFO, "ctrl+o:\t Clear Chart");
-                    EditorClearNotes(&editor);
-                }
-                if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_P))
-                {
-                    TraceLog(LOG_INFO, "ctrl+p:\t Print Editor Notes");
-                    PrintEditor(&editor);
-                }
-                if(IsKeyPressed(KEY_N))
-                {
-                    TraceLog(LOG_INFO, "n:\t Mode INSERT NORMAL");
-                    mode = INSERT_NORMAL;
-                }
-                if(IsKeyPressed(KEY_H))
-                {
-                    TraceLog(LOG_INFO, "h:\t Mode INSERT HOLD");
-                    mode = INSERT_HOLD;
-                }
-                if(IsKeyPressed(KEY_M))
-                {
-                    TraceLog(LOG_INFO, "m:\t Mode INSERT MINE");
-                    mode = INSERT_MINE;
-                }
-		if(IsKeyPressed(KEY_E))
-		{
-		    TraceLog(LOG_INFO, "e:\t Mode EDIT NOTE");
-		    mode = EDIT_NOTE;
-		}
-            }
-            // GENERIC EDITOR
-            if(IsKeyPressed(KEY_BACKSPACE))
-            {
-                EditorRemoveNote(&editor);
-		/*
-		if(mode == EDIT_NOTE)
-		{
-		    TraceLog(LOG_INFO, "Exited EDIT NOTE to MAIN");
-		    mode = MAIN;
-		}
-		*/
-            }
-	    // current_color = 0 is reserved for mines
-            const int COLOR_KEYS[] = {KEY_ONE, KEY_TWO, KEY_THREE};
-            for(int i = 0; i < 3; i++)
-            {
-                if(IsKeyPressed(COLOR_KEYS[i]))
-                {
-                    current_color = i + 1;
-                    TraceLog(LOG_INFO, "%i:\t Color %i", current_color, current_color);
-                    if(mode == EDIT_NOTE) EditorColorCurrentNote(&editor, current_color);
-                }
-            }
-
-            bool left_pressed = IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_COMMA);
-            bool right_pressed = IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_PERIOD);
-
-            if(IsKeyDown(KEY_LEFT_CONTROL) && mode != EDIT_NOTE)
-            {
-                if(left_pressed)
-                {
-		    TraceLog(LOG_INFO, "ctrl+left:\t First Note / Start");
-                    EditorMoveToStart(&editor);
-                }
-                if(right_pressed)
-                {
-		    TraceLog(LOG_INFO, "ctrl+right:\t Last Note / End");
-                    EditorMoveToEnd(&editor);
+                    ChartFilenameRemoveSuffix(&filename);
+                    entering_filename = 0;
                 }
             }
             else
             {
-                char speed = IsKeyDown(KEY_LEFT_SHIFT) ? 1 : 3;
-                if(IsKeyDown(KEY_LEFT_ALT))
-                {
-                    speed *= 4;
-                }
-                if(!IsKeyDown(KEY_PERIOD) && !IsKeyDown(KEY_COMMA))
-                {
-                    speed *= MOVE_DELAY_FRAMES;
-                }
+                EditorProcessCode process_code = EditorProcess(&editor);
 
-		if(mode == EDIT_NOTE && edit_duration)
-		{
-		    if(editor.current != (void*)0 && editor.current->note.hold)
-		    {
-			if(left_pressed && InputTiming(&editor.move_timer, false))
-			{
-			    editor.current->note.time_end -= speed;
-			    if(editor.current->note.time_end < 0)
-			    {
-				editor.current->note.time_end = 0;
-			    }
-			}
-			if(right_pressed && InputTiming(&editor.move_timer, false))
-			{
-			    editor.current->note.time_end += speed;
-			}
-		    }
-		}
-		else if(mode == EDIT_NOTE)
-		{
-		    if(left_pressed && InputTiming(&editor.move_timer, false))
-		    {
-			EditorMoveCurrentNote(&editor, -speed);
-		    }
-		    if(right_pressed && InputTiming(&editor.move_timer, false))
-		    {
-			EditorMoveCurrentNote(&editor, speed);
-		    }
-		}
-		else
-		{
-		    if(left_pressed)
-		    {
-			EditorMoveTimed(&editor, -speed);
-		    }
-		    if(right_pressed)
-		    {
-			EditorMoveTimed(&editor, speed);
-		    }
-		}
-            }
-            if(IsKeyDown(KEY_UP) && InputTiming(&editor.move_timer, false))
-            {
-                EditorMoveToNext(&editor);
-            }
-            if(IsKeyDown(KEY_DOWN) && InputTiming(&editor.move_timer, false))
-            {
-                EditorMoveToPrevious(&editor);
-            }
-            if(!left_pressed && !right_pressed && !IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN))
-            {
-                InputTiming(&editor.move_timer, true);
-            }
-            if(IsKeyPressed(KEY_ESCAPE))
-            {
-		TraceLog(LOG_INFO, "esc:\t Mode MAIN");
-                mode = MAIN;
-                hold_note.active = false;
+                switch(process_code)
+                {
+                    case EDITOR_EXIT_PLAYTEST:
+                        chart = EditorToChart(&editor);
+                        scene = GAME;
+                        game = GameInit();
+                        game.time = -60;
+                        break;
+                    case EDITOR_EXIT_MENU:
+                        EditorDefault(&editor);
+                        scene = MENU;
+                        break;
+                    case EDITOR_LOAD_CHART:
+                        entering_filename = 1;
+                        break;
+                    case EDITOR_SAVE_CHART:
+                        entering_filename = 2;
+                        break;
+                }
             }
 
             BeginDrawing();
                 ClearBackground((Color){248, 224, 255, 255});
-                if(hold_note.active)
-                {
-                    DebugDrawNoteOutline(hold_note, BLUE);
-                    DrawText(TextFormat("(%i)", hold_note.time), 96, 64, 24, BLUE);
-                }
-		if(edit_duration && editor.current != (void*)0)
-		{
-                    DrawText(TextFormat("(%i)", editor.current->note.time_end), 96, 64, 24, BLUE);
-		}
                 DebugDrawEditor(&editor);
-                if(mode == INSERT_NORMAL)
+                if(editor.mode == EM_INSERT_NORMAL)
                 {
                     DrawScreenInline(8.0, YELLOW);
                     DrawText("INSERT NORMAL", 144, 32, 24, BLACK);
                 }
-                if(mode == INSERT_HOLD)
+                if(editor.mode == EM_INSERT_HOLD)
                 {
                     DrawScreenInline(8.0, BLUE);
                     DrawText("INSERT HOLD", 144, 32, 24, BLACK);
                 }
-                if(mode == INSERT_MINE)
+                if(editor.mode == EM_INSERT_MINE)
                 {
                     DrawScreenInline(8.0, RED);
                     DrawText("INSERT MINE", 144, 32, 24, BLACK);
                 }
-		if(mode == EDIT_NOTE)
-		{
+                if(editor.mode == EM_EDIT_NOTE)
+                {
                     DrawScreenInline(8.0, PINK);
                     DrawText("EDIT NOTE", 144, 32, 24, BLACK);
-		}
+                }
+                if(editor.mode == EM_EXIT)
+                {
+                    DrawScreenInline(8.0, BLACK);
+                    DrawText("PRESS ENTER TO EXIT", 144, 32, 24, BLACK);
+                }
+                if(entering_filename)
+                {
+                    if(entering_filename == 1)
+                    {
+                        DrawText("LOADING:", 32, 224, 24, BLACK);
+                    }
+                    if(entering_filename == 2)
+                    {
+                        DrawText("SAVING:", 32, 224, 24, BLACK);
+                    }
+                    DrawText(filename.str, 32, 256, 24, BLACK);
+                }
                 DrawFPS(16, 16);
             EndDrawing();
             break;
         }
     }
 
+    UnloadLoadedDirectory(&files);
     UnloadGameplaySprites(&game_sprites);
 
     CloseWindow();

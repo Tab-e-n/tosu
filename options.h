@@ -46,7 +46,7 @@ typedef struct MenuList {
 } MenuList;
 
 
-void DefaultBindings(KeycodeBindingsW bindings);
+void BindingsDefault(KeycodeBindingsW bindings);
 
 int GetKeyboardInput(void);
 int GetKeyboardInputRelease(void);
@@ -54,7 +54,7 @@ int KeycodeToKeyboard(char code, KeycodeBindings bindings);
 char KeyboardToKeycode(int key, KeycodeBindings bindings);
 char KeycodeBind(char code, KeycodeBindings bindings);
 
-void DefaultOptions(void);
+void OptionsDefault(void);
 
 void UpdateWindowManager(void);
 Vector2 ScreenScale(void);
@@ -75,6 +75,7 @@ int MenuListCurrent(MenuList* menu);
 
 void LoadNewDirectory(FilePathList* files, const char* dir);
 void LoadNewDirectoryEx(FilePathList* files, const char* dir, const char* filter);
+void UnloadLoadedDirectory(FilePathList* files);
 
 
 #endif
