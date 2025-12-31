@@ -16,6 +16,8 @@
 
 #define KEY_AMOUNT 26
 
+#define MENU_MOVE_TIMER 15
+
 
 /*
  * I got confused on how to use KeycodeBindings so this is now here.
@@ -36,6 +38,13 @@ typedef struct WindowManager {
     float x, y;
 } WindowManager;
 
+typedef struct MenuList {
+    bool chosen;
+    int current, 
+        min, max;
+    char move_timer;
+} MenuList;
+
 
 void DefaultBindings(KeycodeBindingsW bindings);
 
@@ -49,7 +58,23 @@ void DefaultOptions(void);
 
 void UpdateWindowManager(void);
 Vector2 ScreenScale(void);
+float ScreenScaleDominant(void);
 Vector2 ScreenSize(void);
+
+bool InputTiming(char* timer, bool reset);
+// min & max inclusive
+MenuList InitMenuList(int min, int max);
+bool MenuListSet(MenuList* menu, int pos);
+bool MenuListMove(MenuList* menu, int move);
+bool MenuListMoveTimed(MenuList* menu, int move);
+// These are a little bit silly
+void MenuListChoose(MenuList* menu);
+void MenuListUnchoose(MenuList* menu);
+bool MenuListHasChosen(MenuList* menu);
+int MenuListCurrent(MenuList* menu);
+
+void LoadNewDirectory(FilePathList* files, const char* dir);
+void LoadNewDirectoryEx(FilePathList* files, const char* dir, const char* filter);
 
 
 #endif

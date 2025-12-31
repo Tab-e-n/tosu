@@ -225,40 +225,17 @@ bool EditorMoveToTimecode(EditorChart* editor, int timecode)
     return EditorMove(editor, timecode - editor->current_time);
 }
 
-bool EditorTiming(EditorChart* editor, bool reset)
-{
-    if(reset)
-    {
-        editor->move_timer = MOVE_DELAY_FRAMES * 6;
-        return false;
-    }
-    if(editor->move_timer == MOVE_DELAY_FRAMES * 6)
-    {
-        editor->move_timer--;
-        return true;
-    }
-    if(editor->move_timer <= 0)
-    {
-        editor->move_timer = MOVE_DELAY_FRAMES * 3;
-        return true;
-    }
-    editor->move_timer--;
-    return false;
-}
-
 bool EditorMoveTimed(EditorChart* editor, int time)
 {
-    if(time == 0)
+    // EditorTiming is reset when time == 0, returns false when resetting
+    char before = editor->move_timer;
+    if(InputTiming(&editor->move_timer, time == 0))
     {
-        EditorTiming(editor, true);
-        return OK;
-    }
-    if(EditorTiming(editor, false))
-    {
+        TraceLog(LOG_INFO, "%i %i XXX", before, editor->move_timer);
         return EditorMove(editor, time);
     }
+    TraceLog(LOG_INFO, "%i %i", before, editor->move_timer);
     return OK;
-
 }
 
 bool EditorAddNote(EditorChart* editor, Note note)

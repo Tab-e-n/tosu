@@ -66,7 +66,6 @@ bool EditorMoveToPrevious(EditorChart* editor);
 
 bool EditorMove(EditorChart* editor, int time); // Increases current_time, changes current_note if required
 bool EditorMoveToTimecode(EditorChart* editor, int timecode); // Sets current_time to timecode, changes current_note if required
-bool EditorTiming(EditorChart* editor, bool reset);
 bool EditorMoveTimed(EditorChart* editor, int time);
 
 bool EditorAddNote(EditorChart* editor, Note note);

@@ -6,6 +6,7 @@
 
 
 typedef enum GameScene {LOGO, MENU, GAME, EDITOR} GameScene;
+typedef enum MainMenuOptions {MAIN_PLAY, MAIN_EDIT, MAIN_OPTIONS, MAIN_EXIT} MainMenuOptions;
 typedef enum EditorMode {MAIN, INSERT_NORMAL, INSERT_HOLD, INSERT_MINE, EDIT_NOTE} EditorMode;
 
 
@@ -21,10 +22,10 @@ int main(void)
     SetTargetFPS(120);
     SetExitKey(KEY_NULL);
 
-    GameScene scene = EDITOR;
+    GameScene scene = MENU;
+    bool window_running = true;
+    FilePathList files = (FilePathList){0};
 
-    Chart* chart = (Chart*)0;
-    GameSpace game = GameInit();
     extern Options options;
     DefaultOptions();
     /*
@@ -35,6 +36,11 @@ int main(void)
     */
     char key = 0;
 
+    MenuList main_menu = InitMenuList(0, 3);
+
+    Chart* chart = (Chart*)0;
+    GameSpace game = GameInit();
+
     EditorChart editor = (EditorChart){0};
     EditorMode mode = MAIN;
     Note hold_note = (Note){0};
@@ -43,11 +49,106 @@ int main(void)
 
     GameplaySprites game_sprites = LoadGameSprites();
 
-    while(!WindowShouldClose())
+    while(!WindowShouldClose() && window_running)
     {
         UpdateWindowManager();
         switch(scene)
         {
+        case MENU:
+            if(MenuListHasChosen(&main_menu) && MenuListCurrent(&main_menu) == MAIN_OPTIONS)
+            {
+                if(IsKeyPressed(KEY_ESCAPE))
+                {
+                    MenuListUnchoose(&main_menu);
+                }
+            }
+            else if(MenuListHasChosen(&main_menu))
+            {
+                if(IsKeyPressed(KEY_ESCAPE))
+                {
+                    MenuListUnchoose(&main_menu);
+                }
+            }
+            else
+            {
+                if(IsKeyDown(KEY_UP))
+                {
+                    MenuListMoveTimed(&main_menu, -1);
+                }
+                if(IsKeyDown(KEY_DOWN))
+                {
+                    MenuListMoveTimed(&main_menu, 1);
+                }
+                if(!IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN))
+                {
+                    MenuListMoveTimed(&main_menu, 0);
+                }
+                if(IsKeyPressed(KEY_ESCAPE))
+                {
+                    if(MenuListSet(&main_menu, MAIN_EXIT))
+                    {
+                        MenuListChoose(&main_menu);
+                    }
+                }
+                if(IsKeyPressed(KEY_ENTER))
+                {
+                    MenuListChoose(&main_menu);
+                }
+                if(MenuListHasChosen(&main_menu))
+                {
+                    switch(MenuListCurrent(&main_menu))
+                    {
+                    case MAIN_PLAY:
+                        LoadNewDirectory(&files, "charts");
+                        break;
+                    case MAIN_EDIT:
+                        LoadNewDirectory(&files, "charts");
+                        break;
+                    case MAIN_OPTIONS:
+                        break;
+                    case MAIN_EXIT:
+                        window_running = false;
+                        break;
+                    }
+                }
+            }
+            BeginDrawing();
+                if(MenuListHasChosen(&main_menu))
+                {
+                    switch(MenuListCurrent(&main_menu))
+                    {
+                    case MAIN_PLAY:
+                        ClearBackground((Color){155, 222, 155, 255});
+                        break;
+                    case MAIN_EDIT:
+                        ClearBackground((Color){222, 222, 155, 255});
+                        break;
+                    case MAIN_OPTIONS:
+                        ClearBackground((Color){155, 155, 222, 255});
+                        break;
+                    }
+                }
+                else
+                {
+                    ClearBackground((Color){222, 155, 222, 255});
+
+                    const char* text[] = {"PLAY", "EDIT", "OPTIONS", "EXIT"};
+                    for(int i = 0; i <= 3; i++)
+                    {
+                        Color color = BLACK;
+                        if(MenuListCurrent(&main_menu) == i)
+                        {
+                            color = GRAY;
+                        }
+                        DrawText(text[i], 32, 32 + 32 * i, 24, color);
+                    }
+                }
+
+                DrawFPS(16, 16);
+            EndDrawing();
+
+            break;
+
         case GAME:
             while(ChartShouldReadNext(chart, &game))
             {
@@ -60,7 +161,16 @@ int main(void)
                 scene = EDITOR;
                 game = GameInit();
             }
+
+            BeginDrawing();
+                ClearBackground((Color){22, 15, 22, 255});
+                // DebugDrawGame(&game);
+                GameDrawNotes(&game, game_sprites);
+                DrawFPS(16, 16);
+            EndDrawing();
+
             break;
+
         case EDITOR:
 	    // TraceLog(LOG_INFO, "k:\t ");
             int input = GetKeyboardInput();
@@ -192,26 +302,15 @@ int main(void)
 		*/
             }
 	    // current_color = 0 is reserved for mines
-            bool change_color = false;
-            if(IsKeyPressed(KEY_ONE))
+            const int COLOR_KEYS[] = {KEY_ONE, KEY_TWO, KEY_THREE};
+            for(int i = 0; i < 3; i++)
             {
-                current_color = 1;
-                change_color = true;
-            }
-            if(IsKeyPressed(KEY_TWO))
-            {
-                current_color = 2;
-                change_color = true;
-            }
-            if(IsKeyPressed(KEY_THREE))
-            {
-                current_color = 3;
-                change_color = true;
-            }
-            if(change_color)
-            {
-		TraceLog(LOG_INFO, "%i:\t Color %i", current_color, current_color);
-		if(mode == EDIT_NOTE) EditorColorCurrentNote(&editor, current_color);
+                if(IsKeyPressed(COLOR_KEYS[i]))
+                {
+                    current_color = i + 1;
+                    TraceLog(LOG_INFO, "%i:\t Color %i", current_color, current_color);
+                    if(mode == EDIT_NOTE) EditorColorCurrentNote(&editor, current_color);
+                }
             }
 
             bool left_pressed = IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_COMMA);
@@ -232,11 +331,7 @@ int main(void)
             }
             else
             {
-                char speed = 3;
-                if(IsKeyDown(KEY_LEFT_SHIFT))
-                {
-                    speed = 1;
-                }
+                char speed = IsKeyDown(KEY_LEFT_SHIFT) ? 1 : 3;
                 if(IsKeyDown(KEY_LEFT_ALT))
                 {
                     speed *= 4;
@@ -250,7 +345,7 @@ int main(void)
 		{
 		    if(editor.current != (void*)0 && editor.current->note.hold)
 		    {
-			if(left_pressed && EditorTiming(&editor, false))
+			if(left_pressed && InputTiming(&editor.move_timer, false))
 			{
 			    editor.current->note.time_end -= speed;
 			    if(editor.current->note.time_end < 0)
@@ -258,7 +353,7 @@ int main(void)
 				editor.current->note.time_end = 0;
 			    }
 			}
-			if(right_pressed && EditorTiming(&editor, false))
+			if(right_pressed && InputTiming(&editor.move_timer, false))
 			{
 			    editor.current->note.time_end += speed;
 			}
@@ -266,11 +361,11 @@ int main(void)
 		}
 		else if(mode == EDIT_NOTE)
 		{
-		    if(left_pressed && EditorTiming(&editor, false))
+		    if(left_pressed && InputTiming(&editor.move_timer, false))
 		    {
 			EditorMoveCurrentNote(&editor, -speed);
 		    }
-		    if(right_pressed && EditorTiming(&editor, false))
+		    if(right_pressed && InputTiming(&editor.move_timer, false))
 		    {
 			EditorMoveCurrentNote(&editor, speed);
 		    }
@@ -287,17 +382,17 @@ int main(void)
 		    }
 		}
             }
-            if(IsKeyDown(KEY_UP) && EditorTiming(&editor, false))
+            if(IsKeyDown(KEY_UP) && InputTiming(&editor.move_timer, false))
             {
                 EditorMoveToNext(&editor);
             }
-            if(IsKeyDown(KEY_DOWN) && EditorTiming(&editor, false))
+            if(IsKeyDown(KEY_DOWN) && InputTiming(&editor.move_timer, false))
             {
                 EditorMoveToPrevious(&editor);
             }
             if(!left_pressed && !right_pressed && !IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN))
             {
-                EditorTiming(&editor, true);
+                InputTiming(&editor.move_timer, true);
             }
             if(IsKeyPressed(KEY_ESCAPE))
             {
@@ -305,24 +400,9 @@ int main(void)
                 mode = MAIN;
                 hold_note.active = false;
             }
-            break;
-        }
 
-        BeginDrawing();
-
-
-        Color bg;
-        switch(scene)
-        {
-            case GAME:
-                bg = (Color){22, 15, 22, 255};
-                ClearBackground(bg);
-                // DebugDrawGame(&game);
-                GameDrawNotes(&game, game_sprites);
-                break;
-            case EDITOR:
-                bg = (Color){248, 224, 255, 255};
-                ClearBackground(bg);
+            BeginDrawing();
+                ClearBackground((Color){248, 224, 255, 255});
                 if(hold_note.active)
                 {
                     DebugDrawNoteOutline(hold_note, BLUE);
@@ -353,12 +433,10 @@ int main(void)
                     DrawScreenInline(8.0, PINK);
                     DrawText("EDIT NOTE", 144, 32, 24, BLACK);
 		}
-                break;
+                DrawFPS(16, 16);
+            EndDrawing();
+            break;
         }
-
-            DrawFPS(16, 16);
-
-        EndDrawing();
     }
 
     UnloadGameplaySprites(&game_sprites);

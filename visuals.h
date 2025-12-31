@@ -45,14 +45,14 @@ void AddGameSprites(GameplaySprites* source, GameplaySprites add);
 void UnloadGameplaySprites(GameplaySprites* sprites);
 
 // Drawing in the editor may need to be done using a dummy GameSpace
-Vector2 NotePosition(char note_key, double scale);
+Vector2 NotePosition(char note_key, float scale);
 int NoteAlphaStart(int time, int game_time);
 int NoteAlphaEnd(int time, int game_time);
 int NoteAlpha(Note note, int game_time);
-double NoteHitCircleScale(int note_time, char score, double scale, int game_time);
-Vector2 NoteHitCirclePosition(Vector2 position, double hit_circle_scale, double scale, int game_time);
+float NoteHitCircleScale(int note_time, char score, float scale, int game_time);
+Vector2 NoteHitCirclePosition(Vector2 position, float hit_circle_scale, float scale, int game_time);
 void DrawNote(Note note, GameSpace* game, GameplaySprites sprites);
-void DrawNoteScore(char score, Vector2 position, double scale, GameplaySprites sprites);
+void DrawNoteScore(char score, Vector2 position, float scale, GameplaySprites sprites);
 void GameDrawNotes(GameSpace* game, GameplaySprites sprites);
 
 void DrawScore(GameSpace* game);

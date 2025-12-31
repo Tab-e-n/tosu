@@ -99,8 +99,110 @@ Vector2 ScreenScale(void)
     return scale;
 }
 
+float ScreenScaleDominant(void)
+{
+    const Vector2 SCREEN_SCALE = ScreenScale();
+    return SCREEN_SCALE.x > SCREEN_SCALE.y ? SCREEN_SCALE.y : SCREEN_SCALE.x;
+}
+
 Vector2 ScreenSize(void)
 {
     Vector2 size = (Vector2){wscale.width, wscale.height};
     return size;
+}
+
+bool InputTiming(char* timer, bool reset)
+{
+    if(reset)
+    {
+        *timer = MENU_MOVE_TIMER * 2;
+        return false;
+    }
+    if(*timer == MENU_MOVE_TIMER * 2)
+    {
+        *timer -= 1;
+        return true;
+    }
+    if(*timer <= 0)
+    {
+        *timer = MENU_MOVE_TIMER;
+        return true;
+    }
+    *timer -= 1;
+    return false;
+}
+
+MenuList InitMenuList(int min, int max)
+{
+    MenuList menu = (MenuList){0};
+    menu.chosen = false;
+    menu.min = min;
+    menu.max = max;
+    menu.current = min;
+    menu.move_timer = MENU_MOVE_TIMER;
+    return menu;
+}
+
+bool MenuListSet(MenuList* menu, int pos)
+{
+    if(menu->current == pos) return FAIL;
+    menu->current = pos;
+    return MenuListMove(menu, 0);
+}
+
+bool MenuListMove(MenuList* menu, int move)
+{
+    menu->current += move;
+    if(menu->current < menu->min)
+    {
+        menu->current = menu->min;
+        return FAIL;
+    }
+    if(menu->current > menu->max)
+    {
+        menu->current = menu->max;
+        return FAIL;
+    }
+    return OK;
+}
+
+bool MenuListMoveTimed(MenuList* menu, int move)
+{
+    if(InputTiming(&menu->move_timer, move == 0))
+    {
+        return MenuListMove(menu, move);
+    }
+    return OK;
+}
+
+void MenuListChoose(MenuList* menu)
+{
+    menu->chosen = true;
+}
+
+void MenuListUnchoose(MenuList* menu)
+{
+    menu->chosen = false;
+}
+
+bool MenuListHasChosen(MenuList* menu)
+{
+    return menu->chosen;
+}
+
+int MenuListCurrent(MenuList* menu)
+{
+    return menu->current;
+}
+
+void LoadNewDirectory(FilePathList* files, const char* dir)
+{
+    if(files->count != 0) UnloadDirectoryFiles(*files);
+    *files = LoadDirectoryFiles(dir);
+}
+
+void LoadNewDirectoryEx(FilePathList* files, const char* dir, const char* filter)
+{
+    if(files->count != 0) UnloadDirectoryFiles(*files);
+    *files = LoadDirectoryFilesEx(dir, filter, false);
 }

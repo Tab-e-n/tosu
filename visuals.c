@@ -160,7 +160,7 @@ int NoteAlpha(Note note, int game_time)
     return alpha < alpha_end ? alpha : alpha_end;
 }
 
-Vector2 NotePosition(char note_key, double scale)
+Vector2 NotePosition(char note_key, float scale)
 {
     const Vector2 SCREEN_SIZE = ScreenSize();
     const int SPACING = scale * (SPRITE_SIZE + 32);
@@ -191,7 +191,7 @@ Vector2 NotePosition(char note_key, double scale)
     return position;
 }
 
-double NoteHitCircleScale(int note_time, char score, double scale, int game_time)
+float NoteHitCircleScale(int note_time, char score, float scale, int game_time)
 {
     int hit_time;
     if(score == HIT_NULL)
@@ -206,10 +206,10 @@ double NoteHitCircleScale(int note_time, char score, double scale, int game_time
     return scale + hit_time * scale * INV_NOTE_SPAWN_WINDOW;
 }
 
-Vector2 NoteHitCirclePosition(Vector2 position, double hit_circle_scale, double scale, int game_time)
+Vector2 NoteHitCirclePosition(Vector2 position, float hit_circle_scale, float scale, int game_time)
 {
-    double offset = hit_circle_scale * SPRITE_SIZE * 0.5;
-    double center = scale * SPRITE_SIZE * 0.5;
+    float offset = hit_circle_scale * SPRITE_SIZE * 0.5;
+    float center = scale * SPRITE_SIZE * 0.5;
     Vector2 hit_circle_position = position;
     hit_circle_position.x += center - offset;
     hit_circle_position.y += center - offset;
@@ -225,8 +225,7 @@ void DrawNote(Note note, GameSpace* game, GameplaySprites sprites)
         return;
     }
 
-    const Vector2 SCREEN_SCALE = ScreenScale();
-    float scale = (SCREEN_SCALE.x > SCREEN_SCALE.y ? SCREEN_SCALE.y : SCREEN_SCALE.x) * 0.25;
+    float scale = ScreenScaleDominant() * 0.25;
 
     Vector2 position = NotePosition(note.key, scale);
 
@@ -237,7 +236,7 @@ void DrawNote(Note note, GameSpace* game, GameplaySprites sprites)
     base_color.a = alpha;
     other_color.a = alpha;
 
-    double hit_circle_scale = NoteHitCircleScale(note.time, note.score, scale, game->time);
+    float hit_circle_scale = NoteHitCircleScale(note.time, note.score, scale, game->time);
     Vector2 hit_circle_position = NoteHitCirclePosition(position, hit_circle_scale, scale, game->time);
 
     Texture sprite_key = sprites.keys[KeycodeBind(note.key, options.bindings)];
@@ -295,7 +294,7 @@ void DrawNote(Note note, GameSpace* game, GameplaySprites sprites)
     }
 }
 
-void DrawNoteScore(char score, Vector2 position, double scale, GameplaySprites sprites)
+void DrawNoteScore(char score, Vector2 position, float scale, GameplaySprites sprites)
 {
     Texture used_texture;
     switch(score)
