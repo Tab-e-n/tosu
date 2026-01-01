@@ -14,6 +14,8 @@
 #define MOVE_DELAY_FRAMES 5
 #define TIMECODE_SHIFT 10
 
+#define CHART_END_DEADSPACE 360
+
 
 typedef enum EditorMode {EM_MAIN, EM_INSERT_NORMAL, EM_INSERT_HOLD, EM_INSERT_MINE, EM_EDIT_NOTE, EM_EXIT} EditorMode;
 typedef enum EditorProcessCode {
@@ -80,6 +82,7 @@ Note IntToNote(int code);
 int SizeOfChart(Chart* chart);
 bool ChartReadNext(Chart* chart, GameSpace* game);
 bool ChartShouldReadNext(Chart* chart, GameSpace* game);
+bool EndOfChart(Chart* chart, GameSpace* game);
 
 bool CopyChart(Chart* copy, Chart* chart);
 ChartLoadResult LoadChart(const char* filename);
