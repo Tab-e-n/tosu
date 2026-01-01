@@ -162,7 +162,7 @@ int main(void)
                 {
                     if(MenuListCurrent(&main_menu) == MAIN_PLAY)
                     {
-                        LoadNewDirectory(&chart_files, files.paths[MenuListCurrent(&file_select)] + 2);
+                        LoadNewDirectoryEx(&chart_files, files.paths[MenuListCurrent(&file_select)] + 2, ".chart");
                         chart_select = InitMenuList(0, chart_files.count - 1);
                     }
                     else if(MenuListCurrent(&file_select) != files.count)
@@ -380,6 +380,7 @@ int main(void)
                         scene = MENU;
                         ChangeDirectory("..");
                         LoadChartFolders(&files, &file_select);
+                        file_select.max += 1;
                         break;
                     case EDITOR_LOAD_CHART:
                         EnterChartFilenameActivate(&filename, 1);

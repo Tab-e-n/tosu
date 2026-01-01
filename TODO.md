@@ -38,21 +38,21 @@ Key rebinds
 Speed & difficulty
 General system for scaling based on window size
 Main Menu
+Selecting charts for play and editing
+Making a new chart folder (setting meta.dat)
+Playtesting and regular play don't conflict
 
 # LIST
-Selecting charts for play and editing
- - Edit selects a whole folder, play selects individual chart
-Making a new chart folder (setting meta.dat)
-Editing meta.dat in editor
-Playtesting and regular play don't conflict
-Ranks
+Ranks & Score
 Finish screen
 Saving scores
-Note hit sound
+meta.dat
+Editing meta.dat in editor
 Playing songs
+Note hit sound
+Customizing Note Colors
 Options menu
 Loading / Saving options
-Customizing Note Colors
 Play song in editor to compare if chart syncs up
 Logos on startup
 
