@@ -9,10 +9,22 @@ typedef enum GameScene {LOGO, MENU, GAME, EDITOR} GameScene;
 typedef enum MainMenuOptions {MAIN_PLAY, MAIN_EDIT, MAIN_OPTIONS, MAIN_EXIT} MainMenuOptions;
 
 
-int main(void)
+void ChangeDirToResources(void)
 {
     ChangeDirectory(GetApplicationDirectory());
     ChangeDirectory("resources");
+}
+
+void LoadChartFolders(FilePathList* files, MenuList* menu)
+{
+    LoadNewDirectory(files, ".");
+    *menu = InitMenuList(0, files->count);
+}
+
+int main(void)
+{
+    ChangeDirToResources();
+    MakeDirectory("charts");
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
@@ -36,6 +48,7 @@ int main(void)
     char key = 0;
 
     MenuList main_menu = InitMenuList(0, 3);
+    MenuList file_select = InitMenuList(0, 0);
 
     Chart* chart = (Chart*)0;
     GameSpace game = GameInit();
@@ -44,9 +57,9 @@ int main(void)
     EditorDefault(&editor);
 
     ChartFilename filename = (ChartFilename){0};
-    ChartFilenameFill(&filename, "test");
-    char entering_filename = 0;
-    char entering_filename_timer = 0;
+    ChartFilenameFill(&filename, "normal");
+    ChartFilename dirname = (ChartFilename){0};
+    ChartFilenameFill(&dirname, "unnamed");
 
     GameplaySprites game_sprites = LoadGameSprites();
 
@@ -56,7 +69,18 @@ int main(void)
         switch(scene)
         {
         case MENU:
-            if(MenuListHasChosen(&main_menu) && (MenuListCurrent(&main_menu) == MAIN_OPTIONS))
+            if(EnterChartFilenameActive(&dirname))
+            {
+                if(EnterChartFilename(&dirname, false))
+                {
+                    MakeDirectory(dirname.str);
+                    ChangeDirectory(dirname.str);
+                    UnloadLoadedDirectory(&files);
+                    scene = EDITOR;
+                    EnterChartFilenameDeactivate(&dirname);
+                }
+            }
+            else if(MenuListHasChosen(&main_menu) && (MenuListCurrent(&main_menu) == MAIN_OPTIONS))
             {
                 if(IsKeyPressed(KEY_ESCAPE))
                 {
@@ -65,9 +89,47 @@ int main(void)
             }
             else if(MenuListHasChosen(&main_menu))
             {
+                if(IsKeyDown(KEY_UP))
+                {
+                    if(MenuListMoveTimed(&file_select, -1))
+                    {
+                        MenuListSet(&file_select, file_select.max);
+                    }
+                }
+                if(IsKeyDown(KEY_DOWN))
+                {
+                    if(MenuListMoveTimed(&file_select, 1))
+                    {
+                        MenuListSet(&file_select, file_select.min);
+                    }
+                }
+                if(!IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN))
+                {
+                    MenuListMoveTimed(&file_select, 0);
+                }
                 if(IsKeyPressed(KEY_ESCAPE))
                 {
                     MenuListUnchoose(&main_menu);
+                    ChangeDirectory("..");
+                }
+                if(IsKeyPressed(KEY_ENTER))
+                {
+                    MenuListChoose(&file_select);
+                }
+                if(MenuListHasChosen(&file_select))
+                {
+                    if(MenuListCurrent(&file_select) != file_select.max)
+                    {
+                        ChangeDirectory(files.paths[MenuListCurrent(&file_select)] + 2);
+                        UnloadLoadedDirectory(&files);
+                        scene = EDITOR;
+                        MenuListUnchoose(&file_select);
+                    }
+                    else
+                    {
+                        EnterChartFilenameActivate(&dirname, 1);
+                        MenuListUnchoose(&file_select);
+                    }
                 }
             }
             else
@@ -100,11 +162,12 @@ int main(void)
                     switch(MenuListCurrent(&main_menu))
                     {
                     case MAIN_PLAY:
-                        LoadNewDirectory(&files, "charts");
+                        ChangeDirectory("charts");
+                        LoadChartFolders(&files, &file_select);
                         break;
                     case MAIN_EDIT:
-                        scene = EDITOR;
-                        //LoadNewDirectory(&files, "charts");
+                        ChangeDirectory("charts");
+                        LoadChartFolders(&files, &file_select);
                         break;
                     case MAIN_OPTIONS:
                         break;
@@ -120,14 +183,32 @@ int main(void)
                     switch(MenuListCurrent(&main_menu))
                     {
                     case MAIN_PLAY:
-                        ClearBackground((Color){155, 222, 155, 255});
-                        break;
                     case MAIN_EDIT:
-                        ClearBackground((Color){222, 222, 155, 255});
+                        ClearBackground((Color){155, 222, 222, 255});
+                        for(int i = 0; i < files.count; i++)
+                        {
+                            Color color = BLACK;
+                            if(MenuListCurrent(&file_select) == i)
+                            {
+                                color = GRAY;
+                            }
+                            DrawText(files.paths[i], 32, 32 + 32 * i, 24, color);
+                        }
+                        Color color = BLACK;
+                        if(MenuListCurrent(&file_select) == file_select.max)
+                        {
+                            color = GRAY;
+                        }
+                        DrawText("+ New chart", 32, 32 + 32 * file_select.max, 24, color);
                         break;
                     case MAIN_OPTIONS:
-                        ClearBackground((Color){155, 155, 222, 255});
+                        ClearBackground((Color){222, 222, 155, 255});
                         break;
+                    }
+                    if(EnterChartFilenameActive(&dirname))
+                    {
+                        DrawText("NEW CHART:", 32, 224, 24, BLACK);
+                        DrawText(dirname.str, 32, 256, 24, BLACK);
                     }
                 }
                 else
@@ -146,7 +227,7 @@ int main(void)
                     }
                 }
 
-                DrawFPS(16, 16);
+                DrawFPS(8, 8);
             EndDrawing();
 
             break;
@@ -160,40 +241,26 @@ int main(void)
             if(IsKeyPressed(KEY_ENTER))
             {
                 free(chart);
-                scene = EDITOR;
                 game = GameInit();
+                scene = EDITOR;
             }
 
             BeginDrawing();
                 ClearBackground((Color){22, 15, 22, 255});
                 // DebugDrawGame(&game);
                 GameDrawNotes(&game, game_sprites);
-                DrawFPS(16, 16);
+                DrawFPS(8, 8);
             EndDrawing();
 
             break;
 
         case EDITOR:
-            if(entering_filename)
+            if(EnterChartFilenameActive(&filename))
             {
-                if(IsKeyDown(KEY_BACKSPACE) && InputTiming(&entering_filename_timer, false))
+                char active_type = 0;
+                if(active_type = EnterChartFilename(&filename, true))
                 {
-                    ChartFilenameRemoveChar(&filename);
-                }
-                if(!IsKeyDown(KEY_BACKSPACE))
-                {
-                    InputTiming(&entering_filename_timer, true);
-                }
-
-                char c = GetCharPressed();
-                if(c)
-                {
-                    ChartFilenameAddChar(&filename, c);
-                }
-                if(IsKeyPressed(KEY_ENTER))
-                {
-                    ChartFilenameSuffix(&filename);
-                    if(entering_filename == 1)
+                    if(active_type == 1)
                     {
                         ChartLoadResult result = LoadChart(filename.str);
                         if(result.success)
@@ -203,19 +270,13 @@ int main(void)
                         }
                         free(result.chart);
                     }
-                    if(entering_filename == 2)
+                    if(active_type == 2)
                     {
                         Chart* temp_chart = EditorToChart(&editor);
                         SaveChart(temp_chart, filename.str);
                         free(temp_chart);
                     }
-                    ChartFilenameRemoveSuffix(&filename);
-                    entering_filename = 0;
-                }
-                if(IsKeyPressed(KEY_ESCAPE))
-                {
-                    ChartFilenameRemoveSuffix(&filename);
-                    entering_filename = 0;
+                    EnterChartFilenameDeactivate(&filename);
                 }
             }
             else
@@ -233,12 +294,14 @@ int main(void)
                     case EDITOR_EXIT_MENU:
                         EditorDefault(&editor);
                         scene = MENU;
+                        ChangeDirectory("..");
+                        LoadChartFolders(&files, &file_select);
                         break;
                     case EDITOR_LOAD_CHART:
-                        entering_filename = 1;
+                        EnterChartFilenameActivate(&filename, 1);
                         break;
                     case EDITOR_SAVE_CHART:
-                        entering_filename = 2;
+                        EnterChartFilenameActivate(&filename, 2);
                         break;
                 }
             }
@@ -271,19 +334,17 @@ int main(void)
                     DrawScreenInline(8.0, BLACK);
                     DrawText("PRESS ENTER TO EXIT", 144, 32, 24, BLACK);
                 }
-                if(entering_filename)
+                if(EnterChartFilenameActive(&filename) == 1)
                 {
-                    if(entering_filename == 1)
-                    {
-                        DrawText("LOADING:", 32, 224, 24, BLACK);
-                    }
-                    if(entering_filename == 2)
-                    {
-                        DrawText("SAVING:", 32, 224, 24, BLACK);
-                    }
+                    DrawText("LOADING:", 32, 224, 24, BLACK);
                     DrawText(filename.str, 32, 256, 24, BLACK);
                 }
-                DrawFPS(16, 16);
+                if(EnterChartFilenameActive(&filename) == 2)
+                {
+                    DrawText("SAVING:", 32, 224, 24, BLACK);
+                    DrawText(filename.str, 32, 256, 24, BLACK);
+                }
+                DrawFPS(8, 8);
             EndDrawing();
             break;
         }

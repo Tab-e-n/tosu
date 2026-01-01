@@ -209,5 +209,9 @@ void LoadNewDirectoryEx(FilePathList* files, const char* dir, const char* filter
 
 void UnloadLoadedDirectory(FilePathList* files)
 {
-    if(files->count != 0) UnloadDirectoryFiles(*files);
+    if(files->count != 0)
+    {
+        UnloadDirectoryFiles(*files);
+        files->count = 0;
+    }
 }

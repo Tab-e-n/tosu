@@ -49,6 +49,7 @@ typedef struct ChartLoadResult
 typedef struct ChartFilename
 {
     int current;
+    char active_type, timer;
     char str[FILENAME_CHARACTERS_INTERNAL];
 } ChartFilename;
 
@@ -90,6 +91,11 @@ bool ChartFilenameRemoveChar(ChartFilename* filename);
 void ChartFilenameSuffix(ChartFilename* filename);
 void ChartFilenameRemoveSuffix(ChartFilename* filename);
 bool ChartFilenameFill(ChartFilename* filename, const char* str);
+
+void EnterChartFilenameActivate(ChartFilename* filename, int type);
+void EnterChartFilenameDeactivate(ChartFilename* filename);
+char EnterChartFilenameActive(ChartFilename* filename);
+char EnterChartFilename(ChartFilename* filename, bool suffix);
 
 bool EditorMoveToStart(EditorChart* editor); // Sets current note to start
 bool EditorMoveToEnd(EditorChart* editor); // Sets current note to end

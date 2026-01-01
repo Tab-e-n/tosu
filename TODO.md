@@ -19,7 +19,7 @@ resources/
       # Store in which data folder the song is,
       # Store in which data folder sprite and sound overrides are,
       # Each separately so they can be in different places if desired.
-      # List all charts used charts
+      # List all used charts
       meta.dat
       # LoadDirectoryFilesEx() can filter for just the chart files
       easy.chart
@@ -37,10 +37,13 @@ When done, go back to Application Directory (`GetApplicationDirectory() or ".."`
 Key rebinds
 Speed & difficulty
 General system for scaling based on window size
+Main Menu
 
 # LIST
-Main Menu
 Selecting charts for play and editing
+ - Edit selects a whole folder, play selects individual chart
+Making a new chart folder (setting meta.dat)
+Editing meta.dat in editor
 Playtesting and regular play don't conflict
 Ranks
 Finish screen
@@ -55,4 +58,6 @@ Logos on startup
 
 # POTENCIAL
 Better way to measure accuracy?
+ - Sum up while playing and the divide by amount at end
+ - Count each possible score separately, so they can show at the finish screen
 

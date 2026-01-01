@@ -254,6 +254,50 @@ bool ChartFilenameFill(ChartFilename* filename, const char* str)
     return OK;
 }
 
+void EnterChartFilenameActivate(ChartFilename* filename, int type)
+{
+    filename->active_type = type;
+}
+
+void EnterChartFilenameDeactivate(ChartFilename* filename)
+{
+    ChartFilenameRemoveSuffix(filename);
+    filename->active_type = 0;
+}
+
+char EnterChartFilenameActive(ChartFilename* filename)
+{
+    return filename->active_type;
+}
+
+char EnterChartFilename(ChartFilename* filename, bool suffix)
+{
+    if(IsKeyDown(KEY_BACKSPACE) && InputTiming(&filename->timer, false))
+    {
+        ChartFilenameRemoveChar(filename);
+    }
+    if(!IsKeyDown(KEY_BACKSPACE))
+    {
+        InputTiming(&filename->timer, true);
+    }
+
+    char c = GetCharPressed();
+    if(c)
+    {
+        ChartFilenameAddChar(filename, c);
+    }
+    if(IsKeyPressed(KEY_ENTER))
+    {
+        if(suffix) ChartFilenameSuffix(filename);
+        return filename->active_type;
+    }
+    if(IsKeyPressed(KEY_ESCAPE))
+    {
+        EnterChartFilenameDeactivate(filename);
+    }
+    return 0;
+}
+
 bool EditorMoveToStart(EditorChart* editor)
 {
     editor->current = editor->start;
