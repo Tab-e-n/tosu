@@ -14,6 +14,7 @@ resources/
       sounds/
         sound_override.ogg
       song.ogg
+  scores/
   charts/
     [chart_folder]/
       # Store in which data folder the song is,
