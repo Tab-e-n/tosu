@@ -40,7 +40,7 @@ typedef struct Note {
 
 typedef struct GameSpace {
     char difficulty, speed;
-    int time, score, offset,
+    int time, time_end, score, offset,
         current_note,
         current_code;
     double accuracy_sum, accuracy_mult;
@@ -64,6 +64,7 @@ bool GameAddNote(GameSpace* game, Note note);
 bool GameMakeNote(GameSpace* game, int time, char key, char color, bool mine);
 bool GameMakeHoldNote(GameSpace* game, int start, int end, char key, char color, bool mine);
 void GameProcessNotes(GameSpace* game);
+bool GameShouldEnd(GameSpace* game);
 
 void DebugDrawNote(Note note, int time);
 void DebugDrawNoteOutline(Note note, Color color);

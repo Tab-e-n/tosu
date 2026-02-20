@@ -288,6 +288,11 @@ void GameProcessNotes(GameSpace* game)
     game->time++;
 }
 
+bool GameShouldEnd(GameSpace* game)
+{
+    return game->time > game->time_end;
+}
+
 void DebugDrawNote(Note note, int time)
 {
     if(!note.active)

@@ -82,7 +82,7 @@ Note IntToNote(int code);
 int SizeOfChart(Chart* chart);
 bool ChartReadNext(Chart* chart, GameSpace* game);
 bool ChartShouldReadNext(Chart* chart, GameSpace* game);
-bool EndOfChart(Chart* chart, GameSpace* game);
+void SetEndOfChart(Chart* chart, GameSpace* game);
 
 bool CopyChart(Chart* copy, Chart* chart);
 ChartLoadResult LoadChart(const char* filename);

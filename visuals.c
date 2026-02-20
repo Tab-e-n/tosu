@@ -333,12 +333,20 @@ void GameDrawNotes(GameSpace* game, GameplaySprites sprites)
 
 void DrawScore(GameSpace* game)
 {
-    // UNIMPLEMENTED
+    // TEMPORARY
+    DrawText(TextFormat("%i", game->score), 32, 32, 24, WHITE);
 }
 
 void DrawTimebar(GameSpace* game)
 {
-    // UNIMPLEMENTED
+    // TEMPORARY
+    float scale = ScreenScaleDominant();
+    int width = (DEFAULT_WINDOW_SIZE.x - 64) * scale;
+    Vector2 screen_size = ScreenSize();
+    int x = (screen_size.x - width) * 0.5;
+    int y = screen_size.y - 32;
+    DrawRectangle(x, y, width, 24, GRAY);
+    DrawRectangle(x, y, width * ((float)game->time / (float)game->time_end), 24, WHITE);
 }
 
 RankSprites LoadRankSprites(void)

@@ -107,6 +107,7 @@ int main(void)
                         scene = GAME;
                         chart = result.chart;
                         game = GameInit();
+                        SetEndOfChart(chart, &game);
                         game.time = -240;
                         playtest = false;
                     }
@@ -304,7 +305,7 @@ int main(void)
             {
                 ChartReadNext(chart, &game);
             }
-            if(EndOfChart(chart, &game))
+            if(GameShouldEnd(&game))
             {
                 exit_gameplay = true;
             }
@@ -332,6 +333,8 @@ int main(void)
                 ClearBackground((Color){22, 15, 22, 255});
                 // DebugDrawGame(&game);
                 GameDrawNotes(&game, game_sprites);
+                DrawScore(&game);
+                DrawTimebar(&game);
                 DrawFPS(8, 8);
             EndDrawing();
 
@@ -372,6 +375,7 @@ int main(void)
                         chart = EditorToChart(&editor);
                         scene = GAME;
                         game = GameInit();
+                        SetEndOfChart(chart, &game);
                         game.time = -120;
                         playtest = true;
                         break;

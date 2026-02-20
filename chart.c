@@ -94,18 +94,13 @@ bool ChartShouldReadNext(Chart* chart, GameSpace* game)
     return false;
 }
 
-bool EndOfChart(Chart* chart, GameSpace* game)
+void SetEndOfChart(Chart* chart, GameSpace* game)
 {
     if(chart == (void*)0)
     {
-        return true;
+        return;
     } 
-    if(game->current_code >= chart->code_amount)
-    {
-        int delta = game->time - (chart->codes[chart->code_amount - 1] >> TIMECODE_SHIFT);
-        return delta > NOTE_DESPAWN_WINDOW + CHART_END_DEADSPACE;
-    }
-    return false;
+    game->time_end = (chart->codes[chart->code_amount - 1] >> TIMECODE_SHIFT) + NOTE_DESPAWN_WINDOW + CHART_END_DEADSPACE;
 }
 
 bool CopyChart(Chart* copy, Chart* chart)
